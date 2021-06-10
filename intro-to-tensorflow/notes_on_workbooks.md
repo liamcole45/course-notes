@@ -1,0 +1,290 @@
+# Notebooks
+### tensors_variables
+[tensors_variables](./tensors_variables.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/tensors-variables.ipynb)
+### Learnings
+1. Setting constant
+```
+rank_0_tensor = tf.constant(4)
+print(rank_0_tensor)
+```
+2. Specifying data types in tensors
+```
+rank_2_tensor = tf.constant([[1, 2], [3, 4], [5, 6]], dtype= tf.float16)
+print(rank_2_tensor)
+```
+3. Convert a tensor to a NumPy array using `np.array` method
+```
+np.array(rank_2_tensor)
+```
+4. Convert a tensor to a NumPy array using `tensor.numpy`
+```
+rank_2_tensor.numpy()
+```
+5. `tf.add`, `tf.multiply` and `tf.matmul`
+```
+a = tf.constant([[1, 2],
+                 [3, 4]])
+b = tf.constant([[1, 1],
+                 [1, 1]]) # Could have also said `tf.ones([2,2])`
+
+print(tf.add(a, b), "\n")
+print(tf.multiply(a, b), "\n")
+print(tf.matmul(a, b), "\n")
+
+print(a + b, "\n") # element-wise addition
+print(a * b, "\n") # element-wise multiplication
+print(a @ b, "\n") # matrix multiplication
+```
+6. Finding largest value in tensor, index of larges value and computing the softmax
+```
+# Find the largest value
+print(tf.reduce_max(c))
+# TODO 1d
+# Find the index of the largest value
+print(tf.argmax(c))
+# Compute the softmax
+print(tf.nn.softmax(c))
+```
+7. Tensor shapes
+```
+print("Type of every element:", rank_4_tensor.dtype)
+print("Number of dimensions:", rank_4_tensor.ndim)
+print("Shape of tensor:", rank_4_tensor.shape)
+print("Elements along axis 0 of tensor:", rank_4_tensor.shape[0])
+print("Elements along the last axis of tensor:", rank_4_tensor.shape[-1])
+print("Total number of elements (3*2*4*5): ", tf.size(rank_4_tensor).numpy())
+```
+8. Single axis indexing
+```
+print("First:", rank_1_tensor[0].numpy())
+print("Second:", rank_1_tensor[1].numpy())
+print("Last:", rank_1_tensor[-1].numpy())
+
+print("Everything:", rank_1_tensor[:].numpy())
+print("Before 4:", rank_1_tensor[:4].numpy())
+print("From 4 to the end:", rank_1_tensor[4:].numpy())
+print("From 2, before 7:", rank_1_tensor[2:7].numpy())
+print("Every other item:", rank_1_tensor[::2].numpy())
+print("Reversed:", rank_1_tensor[::-1].numpy())
+```
+9. Multi axis indexing
+```
+# Pull out a single value from a 2-rank tensor
+print(rank_2_tensor[1, 1].numpy())
+
+# Get row and column tensors
+print("Second row:", rank_2_tensor[1, :].numpy())
+print("Second column:", rank_2_tensor[:, 1].numpy())
+print("Last row:", rank_2_tensor[-1, :].numpy())
+print("First item in last column:", rank_2_tensor[0, -1].numpy())
+print("Skip the first row:")
+print(rank_2_tensor[1:, :].numpy(), "\n")
+
+print(rank_3_tensor[:, :, 4])
+```
+10. `tf.variable` (and naming it) and `tf.reshape`
+```
+# Shape returns a `TensorShape` object that shows the size on each dimension
+var_x = tf.Variable(tf.constant([[1], [2], [3]]))
+print(var_x.shape)
+
+# We can reshape a tensor to a new shape.
+reshaped = tf.reshape(var_x, [1, 3])
+
+print(tf.reshape(rank_3_tensor, [3*2, 5]), "\n")
+print(tf.reshape(rank_3_tensor, [3, -1]))
+
+# Create a and b; they have the same value but are backed by different tensors.
+a = tf.Variable(my_tensor, name="Mark")
+# A new variable with the same name, but different value
+# Note that the scalar add is broadcast
+b = tf.Variable(my_tensor + 1, name="Mark")
+
+# These are elementwise-unequal, despite having the same name
+print(a == b)
+```
+11. `tf.cast`, used for casting different data types
+```
+# Use the `Tensor.dtype` property
+# You can cast from type to type
+the_f64_tensor = tf.constant([2.2, 3.3, 4.4], dtype=tf.float64)
+the_f16_tensor = tf.cast(the_f64_tensor, dtype=tf.float16)
+# Now, let's cast to an uint8 and lose the decimal precision
+the_u8_tensor = tf.cast(the_f16_tensor, dtype=tf.uint8)
+print(the_u8_tensor)
+```
+12. `tf.broadcast_to`, broadcasting tensors. Means stretching smaller ones
+```
+x = tf.constant([1, 2, 3])
+
+y = tf.constant(2)
+z = tf.constant([2, 2, 2])
+# All of these are the same computation
+print(tf.multiply(x, 2))
+print(x * y)
+print(x * z)
+
+print(tf.broadcast_to(tf.constant([1, 2, 3]), [3, 3]))
+```
+13. Ragged tensor, `tf.ragged`
+```
+ragged_tensor = tf.ragged.constant(ragged_list)
+print(ragged_tensor)
+```
+14. `tf.strings.split`
+```
+print(tf.strings.split(tensor_of_strings))
+```
+15. `tf.sparse.SparseTensor`
+```
+sparse_tensor = tf.sparse.SparseTensor(indices=[[0, 0], [1, 2]],values=[1, 2],
+ dense_shape=[3, 4])
+print(sparse_tensor, "\n")
+```
+
+### write_low_level_code
+[write_low_level_code](./write_low_level_code.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/write_low_level_code.ipynb)
+1. Modeling linear regression `y = 2x + 10`
+```
+X = tf.constant(range(10), dtype=tf.float32)
+Y = 2 * X + 10
+
+print("X:{}".format(X))
+print("Y:{}".format(Y))
+
+X_test = tf.constant(range(10, 20), dtype=tf.float32)
+Y_test = 2 * X_test + 10
+
+print("X_test:{}".format(X_test))
+print("Y_test:{}".format(Y_test))
+
+y_mean = Y.numpy().mean()
+
+
+def predict_mean(X):
+    y_hat = [y_mean] * len(X)
+    return y_hat
+
+Y_hat = predict_mean(X_test)
+```
+2. Linear regression loss_mse function
+```
+def loss_mse(X, Y, w0, w1):
+    Y_hat = w0 * X + w1
+    errors = (Y_hat - Y)**2
+    return tf.reduce_mean(errors)
+```
+3. `tf.GradientTable()` to get loss from linear regression
+```
+def compute_gradients(X, Y, w0, w1):
+    with tf.GradientTape() as tape: # Record operations for automatic differentiation.
+        loss = loss_mse(X, Y, w0, w1)
+    return tape.gradient(loss, [w0, w1])
+
+w0 = tf.Variable(0.0)
+w1 = tf.Variable(0.0)
+
+dw0, dw1 = compute_gradients(X, Y, w0, w1)
+print("dw0:", dw0.numpy())
+print("dw1", dw1.numpy())
+
+# TODO 3
+STEPS = 1000
+LEARNING_RATE = .02
+MSG = "STEP {step} - loss: {loss}, w0: {w0}, w1: {w1}\n"
+
+
+w0 = tf.Variable(0.0)
+w1 = tf.Variable(0.0)
+
+
+for step in range(0, STEPS + 1):
+
+    dw0, dw1 = compute_gradients(X, Y, w0, w1)
+    w0.assign_sub(dw0 * LEARNING_RATE)
+    w1.assign_sub(dw1 * LEARNING_RATE)
+
+    if step % 100 == 0: # % is modulus. To find out if a year is a leap year or not, you can divide it by four and if the remainder is zero, it is a leap year.
+        loss = loss_mse(X, Y, w0, w1)
+        print(MSG.format(step=step, loss=loss, w0=w0.numpy(), w1=w1.numpy()))
+
+loss = loss_mse(X_test, Y_test, w0, w1)
+loss.numpy()
+```
+4. Modelling non linear function is captured at end of the notebook
+
+### load_diff_filedata.ipynb
+[load_diff_filedata](./load_diff_filedata.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/load_diff_filedata.ipynb)
+1. Make numpy values easier to read.
+```
+np.set_printoptions(precision=3, suppress=True)
+```
+2. Download file from website using `tf.keras.utils.get_file`
+```
+TRAIN_DATA_URL = "https://storage.googleapis.com/tf-datasets/titanic/train.csv"
+TEST_DATA_URL = "https://storage.googleapis.com/tf-datasets/titanic/eval.csv"
+
+train_file_path = tf.keras.utils.get_file("train.csv", TRAIN_DATA_URL)
+test_file_path = tf.keras.utils.get_file("eval.csv", TEST_DATA_URL)
+```
+3. Head csv using bash
+```
+!head {train_file_path}
+```
+4. Get and view dataset using `show_batch`
+```
+def get_dataset(file_path, **kwargs):
+    dataset = tf.data.experimental.make_csv_dataset(
+        file_path,
+        batch_size = 5, # Artificially small to make examples easier to show.
+        label_name=LABEL_COLUMN,
+        na_value='?',
+        num_epochs=1,
+        ignore_errors=True,
+        **kwargs)
+    return dataset
+
+raw_train_data = get_dataset(train_file_path)
+raw_test_data = get_dataset(test_file_path)
+
+show_batch(raw_train_data)
+```
+5. Data normalisation. **Continous data should always be normalised**
+```
+NUMERIC_FEATURES = ['age','n_siblings_spouses','parch', 'fare']
+import pandas as pd
+desc = pd.read_csv(train_file_path)[NUMERIC_FEATURES].describe()
+desc
+
+MEAN = np.array(desc.T['mean'])
+STD = np.array(desc.T['std'])
+print(MEAN,STD)
+
+def normalize_numeric_data(data, mean, std):
+    return (data-mean)/std
+
+# See what you just created.
+normalizer = functools.partial(normalize_numeric_data, mean=MEAN, std=STD)
+
+numeric_column = tf.feature_column.numeric_column('numeric', normalizer_fn=normalizer, shape=[len(NUMERIC_FEATURES)])
+numeric_columns = [numeric_column]
+numeric_column
+```
+6. Dealing with categorical data
+```
+categorical_columns = []
+for feature, vocab in CATEGORIES.items():
+  cat_col = tf.feature_column.categorical_column_with_vocabulary_list(
+        key=feature, vocabulary_list=vocab)
+  categorical_columns.append(tf.feature_column.indicator_column(cat_col))
+
+categorical_layer = tf.keras.layers.DenseFeatures(categorical_columns)
+print(categorical_layer(example_batch).numpy()[0])
+```
+7. Combined preprocessing layer
+```
+preprocessing_layer = tf.keras.layers.DenseFeatures(categorical_columns+numeric_columns)
+```

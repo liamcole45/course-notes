@@ -303,7 +303,7 @@ print(len(train), 'train examples')
 print(len(val), 'validation examples')
 print(len(test), 'test examples')
 ```
-2. create a tf.data dataset from a Pandas Dataframe
+2. create a `tf.data` dataset from a Pandas Dataframe
 ```
 def df_to_dataset(dataframe, shuffle=True, batch_size=32):
   dataframe = dataframe.copy()
@@ -314,7 +314,7 @@ def df_to_dataset(dataframe, shuffle=True, batch_size=32):
   ds = ds.batch(batch_size)
   return ds
 ```
-3. tf.feature_column
+3. `tf.feature_column`
 ```
 age = feature_column.numeric_column("age")
 tf.feature_column.numeric_column
@@ -430,3 +430,108 @@ plot_curves(history, ['loss', 'accuracy'])
 ```
 13. ## Key Point
 You will typically see best results with deep learning with much larger and more complex datasets. When working with a small dataset like this one, we recommend using a decision tree or random forest as a strong baseline. The goal of this tutorial is not to train an accurate model, but to demonstrate the mechanics of working with structured data, so you have code to use as a starting point when working with your own datasets in the future.
+### tfrecord-tf.example.ipynb
+[tfrecord-tf.example.ipynb](./tfrecord-tf.example.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/tfrecord-tf.example.ipynb)
+1. `tf.train.Feature`
+Fundamentally, a `tf.Example` is a `{"string": tf.train.Feature}` mapping.
+
+The `tf.train.Feature` message type can accept one of the following three types (See the [`.proto` file](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/example/feature.proto) for reference). Most other generic types can be coerced into one of these:
+
+a. `tf.train.BytesList` (the following types can be coerced)
+
+  - `string`
+  - `byte`
+
+b. `tf.train.FloatList` (the following types can be coerced)
+
+  - `float` (`float32`)
+  - `double` (`float64`)
+
+c. `tf.train.Int64List` (the following types can be coerced)
+
+  - `bool`
+  - `enum`
+  - `int32`
+  - `uint32`
+  - `int64`
+  - `uint64`
+2. `serialize_example`
+```
+def serialize_example(feature0, feature1, feature2, feature3):
+  """
+  Creates a tf.Example message ready to be written to a file.
+  """
+  # Create a dictionary mapping the feature name to the tf.Example-compatible
+  # data type.
+  feature = {
+      'feature0': _int64_feature(feature0),
+      'feature1': _int64_feature(feature1),
+      'feature2': _bytes_feature(feature2),
+      'feature3': _float_feature(feature3),
+  }
+
+  # Create a Features message using tf.train.Example.
+
+  example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
+  return example_proto.SerializeToString()
+```
+3. `tf.train.Example.FromString`
+```
+example_proto = tf.train.Example.FromString(serialized_example)
+example_proto
+```
+4. `tf_serialize_example`
+```
+ # TODO 2a
+def tf_serialize_example(f0,f1,f2,f3):
+  tf_string = tf.py_function(
+    serialize_example,
+    (f0,f1,f2,f3),  # pass these args to the above function.
+    tf.string)      # the return type is `tf.string`.
+  return tf.reshape(tf_string, ()) # The result is a scalar
+
+  tf_serialize_example(f0,f1,f2,f3)
+
+# `.map` function maps across the elements of the dataset.
+serialized_features_dataset = features_dataset.map(tf_serialize_example)
+serialized_features_dataset
+```
+5. `tf.data.TFRecordDataset`
+```
+ # TODO 2c
+filenames = [filename]
+raw_dataset = tf.data.TFRecordDataset(filenames)
+raw_dataset
+```
+6. Use the `.take` method to pull ten examples from the dataset.
+```
+for raw_record in raw_dataset.take(10):
+  print(repr(raw_record))
+```
+7. Create a description of the features
+```
+# Create a description of the features.
+feature_description = {
+    'feature0': tf.io.FixedLenFeature([], tf.int64, default_value=0),
+    'feature1': tf.io.FixedLenFeature([], tf.int64, default_value=0),
+    'feature2': tf.io.FixedLenFeature([], tf.string, default_value=''),
+    'feature3': tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
+}
+
+def _parse_function(example_proto):
+  # Parse the input `tf.Example` proto using the dictionary above.
+  return tf.io.parse_single_example(example_proto, feature_description)
+```
+8. `tf.io.TFRecordWriter`
+```
+# Write the raw image files to `images.tfrecords`.
+# First, process the two images into `tf.Example` messages.
+# Then, write to a `.tfrecords` file.
+record_file = 'images.tfrecords'
+with tf.io.TFRecordWriter(record_file) as writer:
+  for filename, label in image_labels.items():
+    image_string = open(filename, 'rb').read()
+    tf_example = image_example(image_string, label)
+    writer.write(tf_example.SerializeToString())
+```

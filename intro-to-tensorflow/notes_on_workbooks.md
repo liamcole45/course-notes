@@ -535,3 +535,167 @@ with tf.io.TFRecordWriter(record_file) as writer:
     tf_example = image_example(image_string, label)
     writer.write(tf_example.SerializeToString())
 ```
+### 2_dataset_api.ipynb
+[2_dataset_api.ipynb](./2_dataset_api.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/2_dataset_api.ipynb)
+
+1. how to use tf.data to read data from memory
+```
+# Lets define the create_dataset() procedure
+def create_dataset(X, Y, epochs, batch_size):
+    # Using the tf.data.Dataset.from_tensor_slices((X,Y))
+    dataset = tf.data.Dataset.from_tensor_slices((X,Y))
+    dataset = dataset.repeat(epochs).batch(batch_size, drop_remainder=True)
+    return dataset
+```
+2. test function by iterating twice over our dataset in batches of 3 datapoints
+```
+BATCH_SIZE = 3
+EPOCH = 2
+
+dataset = create_dataset(X, Y, epochs=EPOCH, batch_size=BATCH_SIZE)
+
+for i, (x, y) in enumerate(dataset):
+    # You can convert a native TF tensor to a NumpPy array ising .numpy() method
+    # Let's output the value of x & y
+    print("x:", x.numpy(), "y:", y.numpy())
+    assert len(x) == BATCH_SIZE
+    assert len(y) == BATCH_SIZE
+```
+3. how to use tf.data in a training loop
+```
+EPOCHS = 250
+BATCH_SIZE = 2
+LEARNING_RATE = .02
+
+MSG = "STEP {step} - loss: {loss}, w0: {w0}, w1: {w1}\n"
+
+w0 = tf.Variable(0.0)
+w1 = tf.Variable(0.0)
+
+dataset = create_dataset(X, Y, epochs=EPOCHS, batch_size=BATCH_SIZE)
+
+for step, (X_batch, Y_batch) in enumerate(dataset):
+
+    dw0, dw1 = compute_gradients(X_batch, Y_batch, w0, w1)
+    w0.assign_sub(dw0 * LEARNING_RATE)
+    w1.assign_sub(dw1 * LEARNING_RATE)
+
+    if step % 100 == 0:
+        loss = loss_mse(X_batch, Y_batch, w0, w1)
+        print(MSG.format(step=step, loss=loss, w0=w0.numpy(), w1=w1.numpy()))
+        
+assert loss < 0.0001
+assert abs(w0 - 2) < 0.001
+assert abs(w1 - 10) < 0.001
+```
+4. tf.data to read the CSV files
+The first step is to define 
+
+- the feature names into a list `CSV_COLUMNS`
+- their default values into a list `DEFAULTS`
+
+```
+CSV_COLUMNS = [
+    'fare_amount',
+    'pickup_datetime',
+    'pickup_longitude',
+    'pickup_latitude',
+    'dropoff_longitude',
+    'dropoff_latitude',
+    'passenger_count',
+    'key'
+]
+LABEL_COLUMN = 'fare_amount'
+DEFAULTS = [[0.0], ['na'], [0.0], [0.0], [0.0], [0.0], [0.0], ['na']]
+```
+5. how to use tf.data to read data from disk
+```
+def create_dataset(pattern):
+    # the tf.data.experimental.make_csv_dataset() method reads CSV files into a dataset
+    return tf.data.experimental.make_csv_dataset(pattern, 1, CSV_COLUMNS, DEFAULTS)
+
+tempds = create_dataset('../data/taxi-train*')
+print(tempds)
+```
+
+Note that this is a prefetched dataset, where each element is an `OrderedDict` whose keys are the feature names and whose values are tensors of shape `(1,)` (i.e. vectors).
+
+Let's iterate over the two first element of this dataset using `dataset.take(2)` and let's convert them ordinary Python dictionary with numpy array as values for more readability:
+```
+for data in tempds.take(2):
+    pprint({k: v.numpy() for k, v in data.items()})
+    print("\n")
+```
+6. Transforming the features
+```
+UNWANTED_COLS = ['pickup_datetime', 'key']
+
+# Lets define the features_and_labels() method
+def features_and_labels(row_data):
+    # The .pop() method will return item and drop from frame
+    label = row_data.pop(LABEL_COLUMN)
+    features = row_data
+    
+    for unwanted_col in UNWANTED_COLS:
+        features.pop(unwanted_col)
+
+    return features, label
+```
+7. Let's iterate over 2 examples from our `tempds` dataset and apply our `feature_and_labels`
+function to each of the examples to make sure it's working:
+```
+for row_data in tempds.take(2):
+    features, label = features_and_labels(row_data)
+    pprint(features)
+    print(label, "\n")
+    assert UNWANTED_COLS[0] not in features.keys()
+    assert UNWANTED_COLS[1] not in features.keys()
+    assert label.shape == [1]
+```
+8. how to write production input pipelines with feature engineering (batching, shuffling, etc.)
+```
+# Let's define the create_dataset() method
+def create_dataset(pattern, batch_size):
+    # the tf.data.experimental.make_csv_dataset() method reads CSV files into a dataset
+    dataset = tf.data.experimental.make_csv_dataset(
+        pattern, batch_size, CSV_COLUMNS, DEFAULTS)
+    return dataset.map(features_and_labels)
+```
+9. test that our batches are of the right size
+```
+BATCH_SIZE = 2
+
+tempds = create_dataset('../data/taxi-train*', batch_size=2)
+
+for X_batch, Y_batch in tempds.take(2):
+    pprint({k: v.numpy() for k, v in X_batch.items()})
+    print(Y_batch.numpy(), "\n")
+    assert len(Y_batch) == BATCH_SIZE
+```
+10. Shuffling
+
+When training a deep learning model in batches over multiple workers, it is helpful if we shuffle the data. That way, different workers will be working on different parts of the input file at the same time, and so averaging gradients across workers will help. Also, during training, we will need to read the data indefinitely.
+```
+def create_dataset(pattern, batch_size=1, mode='eval'):
+    dataset = tf.data.experimental.make_csv_dataset(
+        pattern, batch_size, CSV_COLUMNS, DEFAULTS)
+
+    # The map() function executes a specified function for each item in an interable.
+    # The item is sent to the function as a parameter
+    
+    dataset = dataset.map(features_and_labels).cache()
+
+    if mode == 'train':
+        dataset = dataset.shuffle(1000).repeat()
+
+    # take advantage of multi-threading; 1=AUTOTUNE
+    dataset = dataset.prefetch(1)
+    
+    return dataset
+```
+11. Let's check that our function works well in both models
+```
+tempds = create_dataset('../data/taxi-train*', 2, 'train')
+print(list(tempds.take(1)))
+```

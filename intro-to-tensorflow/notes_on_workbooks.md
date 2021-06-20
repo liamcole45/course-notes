@@ -699,3 +699,57 @@ def create_dataset(pattern, batch_size=1, mode='eval'):
 tempds = create_dataset('../data/taxi-train*', 2, 'train')
 print(list(tempds.take(1)))
 ```
+### adv_tfdv_facets.ipynb
+[adv_tfdv_facets](./adv_tfdv_facets.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/adv_tfdv_facets.ipynb)
+1. Use TFRecords to load record-oriented binary format data
+```
+download_original_data = False #@param {type:"boolean"}
+
+# Downloads a file from a URL if it is not already in cache using the `tf.keras.utils.get_file()` function
+if download_original_data:
+    train_tf_file = tf.keras.utils.get_file('train_tf.tfrecord',
+                                          'https://storage.googleapis.com/civil_comments_dataset/train_tf.tfrecord')
+    validate_tf_file = tf.keras.utils.get_file('validate_tf.tfrecord',
+                                              'https://storage.googleapis.com/civil_comments_dataset/validate_tf.tfrecord')
+    # The identity terms list will be grouped together by their categories
+    # (see 'IDENTITY_COLUMNS') on threshould 0.5. Only the identity term column,
+    # text column and label column will be kept after processing.
+    train_tf_file = util.convert_comments_data(train_tf_file)
+    validate_tf_file = util.convert_comments_data(validate_tf_file)
+    
+else:
+    train_tf_file = tf.keras.utils.get_file('train_tf_processed.tfrecord',
+                                          'https://storage.googleapis.com/civil_comments_dataset/train_tf_processed.tfrecord')
+    validate_tf_file = tf.keras.utils.get_file('validate_tf_processed.tfrecord',
+                                              'https://storage.googleapis.com/civil_comments_dataset/validate_tf_processed.tfrecord')
+```
+2. `tfdv.generate_statistics_from_tfrecord` to generate statistics and Facets to visualize the data
+```
+ The computation of statistics using TFDV.  The returned value is a DatasetFeatureStatisticsList protocol buffer. 
+stats = tfdv.generate_statistics_from_tfrecord(data_location=train_tf_file)
+
+# A visualization of the statistics using Facets Overview.
+tfdv.visualize_statistics(stats)
+```
+3. Analyze label distribution for subset groups
+```
+#@title Calculate label distribution for gender-related examples
+raw_dataset = tf.data.TFRecordDataset(train_tf_file)
+
+toxic_gender_examples = 0
+nontoxic_gender_examples = 0
+
+# There are 1,082,924 examples in the dataset
+# The `take()` method returns the specified number of elements starting from the first element
+for raw_record in raw_dataset.take(1082924):
+    example = tf.train.Example()
+    example.ParseFromString(raw_record.numpy())
+    if str(example.features.feature["gender"].bytes_list.value) != "[]":
+        if str(example.features.feature["toxicity"].float_list.value) == "[1.0]":
+            toxic_gender_examples += 1
+        else: nontoxic_gender_examples += 1
+            
+print("Toxic Gender Examples: %s" % toxic_gender_examples)
+print("Nontoxic Gender Examples %s" % nontoxic_gender_examples)
+```

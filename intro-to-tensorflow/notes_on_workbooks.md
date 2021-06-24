@@ -753,3 +753,237 @@ for raw_record in raw_dataset.take(1082924):
 print("Toxic Gender Examples: %s" % toxic_gender_examples)
 print("Nontoxic Gender Examples %s" % nontoxic_gender_examples)
 ```
+### 3_keras_sequential_api.ipynb
+[3_keras_sequential_api](./3_keras_sequential_api.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/3_keras_sequential_api.ipynb)
+1. change the ownership of the repo to the user
+```
+!sudo chown -R jupyter:jupyter /home/jupyter/training-data-analyst
+```
+2. finding if have permission to datasets
+```
+# using -l parameter will list the files with assigned permissions
+!ls -l ../data/*.csv
+```
+3. Use tf.data to read the CSV files
+```
+# feature names into list
+CSV_COLUMNS = [
+    'fare_amount',
+    'pickup_datetime',
+    'pickup_longitude',
+    'pickup_latitude',
+    'dropoff_longitude',
+    'dropoff_latitude',
+    'passenger_count',
+    'key'
+]
+LABEL_COLUMN = 'fare_amount'
+# listing default values
+DEFAULTS = [[0.0], ['na'], [0.0], [0.0], [0.0], [0.0], [0.0], ['na']]
+UNWANTED_COLS = ['pickup_datetime', 'key']
+
+
+def features_and_labels(row_data):
+    # the pop method will return item and drop from frame
+    label = row_data.pop(LABEL_COLUMN)
+    features = row_data
+    
+    for unwanted_col in UNWANTED_COLS:
+        features.pop(unwanted_col)
+
+    return features, label
+
+
+def create_dataset(pattern, batch_size=1, mode='eval'):
+    # the tf.data.experimental.make_csv_dataset() method reads CSV files into dataset
+    dataset = tf.data.experimental.make_csv_dataset(
+        pattern, batch_size, CSV_COLUMNS, DEFAULTS)
+
+    # the map() function executes a specified function for each item in an iterable
+    # the item is sent to the function as a parameter
+    dataset = dataset.map(features_and_labels)
+
+    if mode == 'train':
+    # the shuffle() method takes a sequence (list, string, tuple) and re organise the order of the items
+        dataset = dataset.shuffle(buffer_size=1000).repeat()
+
+    # take advantage of multi-threading; 1=AUTOTUNE
+    dataset = dataset.prefetch(1)
+    return dataset
+```
+4. In our case we won't do any feature engineering. However, we still need to create a list of feature columns to specify the numeric values which will be passed on to our model. To do this, we use `tf.feature_column.numeric_column()`
+
+We use a python dictionary comprehension to create the feature columns for our model, which is just an elegant alternative to a for loop.
+```
+INPUT_COLS = [
+    'pickup_longitude',
+    'pickup_latitude',
+    'dropoff_longitude',
+    'dropoff_latitude',
+    'passenger_count',
+]
+
+# Create input layer of feature columns
+feature_columns = {
+    colname: tf.feature_column.numeric_column(colname)
+    for colname in INPUT_COLS
+}
+```
+5. Create a deep neural network using Keras's Sequential API.
+```
+# Build a keras DNN model using Sequential API
+model = Sequential([
+    DenseFeatures(feature_columns=feature_columns.values()),
+    Dense(units=32, activation='relu', name='h1'),
+    Dense(units=8, activation='relu', name='h2'),
+    Dense(units=1, activation='relu', name='output')
+])
+```
+6. Create a custom loss function called `rmse` which computes the root mean squared error between `y_true` and `y_pred`. Pass this function to the model as an evaluation metric. 
+```
+# Create a custom evalution metric
+def rmse(y_true, y_pred):
+    return tf.sqrt(tf.reduce_mean(tf.square(y_pred - y_true)))
+
+# Compile the keras model
+model.compile(optimizer= 'adam', loss= 'mse', metrics= [rmse,'mse'])
+```
+7. ## Train the model
+
+To train your model, Keras provides three functions that can be used:
+ 1. `.fit()` for training a model for a fixed number of epochs (iterations on a dataset).
+ 2. `.fit_generator()` for training a model on data yielded batch-by-batch by a generator
+ 3. `.train_on_batch()` runs a single gradient update on a single batch of data. 
+ 
+The `.fit()` function works well for small datasets which can fit entirely in memory. However, for large datasets (or if you need to manipulate the training data on the fly via data augmentation, etc) you will need to use `.fit_generator()` instead. The `.train_on_batch()` method is for more fine-grained control over training and accepts only a single batch of data.
+
+The taxifare dataset we sampled is small enough to fit in memory, so can we could use `.fit` to train our model. Our `create_dataset` function above generates batches of training examples, so we could also use `.fit_generator`. In fact, when calling `.fit` the method inspects the data, and if it's a generator (as our dataset is) it will invoke automatically `.fit_generator` for training. 
+
+We start by setting up some parameters for our training job and create the data generators for the training and validation data.
+
+We refer you the the blog post [ML Design Pattern #3: Virtual Epochs](https://medium.com/google-cloud/ml-design-pattern-3-virtual-epochs-f842296de730) for further details on why express the training in terms of `NUM_TRAIN_EXAMPLES` and `NUM_EVALS` and why, in this training code, the number of epochs is really equal to the number of evaluations we perform.
+```
+TRAIN_BATCH_SIZE = 1000
+NUM_TRAIN_EXAMPLES = 10000 * 5  # training dataset will repeat, wrap around
+NUM_EVALS = 50  # how many times to evaluate
+NUM_EVAL_EXAMPLES = 10000  # enough to get a reasonable sample
+
+trainds = create_dataset(
+    pattern='../data/taxi-train*',
+    batch_size=TRAIN_BATCH_SIZE,
+    mode='train')
+
+evalds = create_dataset(
+    pattern='../data/taxi-valid*',
+    batch_size=1000,
+    mode='eval').take(NUM_EVAL_EXAMPLES//1000) # // operator to do integer division (i.e., quotient without remainder)
+```
+8. High-level model evaluation using `.summary`
+```
+model.summary()
+```
+9. Running .fit (or .fit_generator) returns a History object which collects all the events recorded during training. Similar to Tensorboard, we can plot the training and validation curves for the model loss and rmse by accessing these elements of the History object.
+```
+RMSE_COLS = ['rmse', 'val_rmse']
+
+pd.DataFrame(history.history)[RMSE_COLS].plot()
+
+LOSS_COLS = ['loss', 'val_loss']
+
+pd.DataFrame(history.history)[LOSS_COLS].plot()
+```
+10. Making predictions with our model
+```
+# The predict() method will predict the response for model
+# Using tf.convert_to_tensor() we will convert the given value to a Tensor
+
+model.predict(x={"pickup_longitude": tf.convert_to_tensor([-73.982683]),
+                 "pickup_latitude": tf.convert_to_tensor([40.742104]),
+                 "dropoff_longitude": tf.convert_to_tensor([-73.983766]),
+                 "dropoff_latitude": tf.convert_to_tensor([40.755174]),
+                 "passenger_count": tf.convert_to_tensor([3.0])},
+              steps=1)
+```
+11. ## Export and deploy our model
+Use `tf.saved_model.save` to export the trained model to a Tensorflow SavedModel format. Reference the [documentation for `tf.saved_model.save`](https://www.tensorflow.org/api_docs/python/tf/saved_model/save) as you fill in the code for the cell below.
+
+Next, print the signature of your saved model using the SavedModel Command Line Interface command `saved_model_cli`. You can read more about the command line interface and the `show` and `run` commands it supports in the [documentation here](https://www.tensorflow.org/guide/saved_model#overview_of_commands). 
+```
+OUTPUT_DIR = "./export/savedmodel"
+shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
+EXPORT_PATH = os.path.join(OUTPUT_DIR,
+                           datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+
+tf.saved_model.save(model, EXPORT_PATH) # with default serving function
+```
+12. ## Export the model to a TensorFlow SavedModel format
+```
+!saved_model_cli show \
+ --tag_set serve \
+ --signature_def serving_default \
+ --dir {export_path}
+
+!find {EXPORT_PATH}
+os.environ['EXPORT_PATH'] = EXPORT_PATH
+```
+13. ## Deploy our model to AI Platform
+```
+%%bash
+gcloud config set compute/region us-east1
+gcloud config set ai_platform/region global
+```
+Below cell will take around 10 minutes to complete.
+```
+%%bash
+
+PROJECT=qwiklabs-gcp-00-94c0998b6fe5
+BUCKET=${PROJECT}
+REGION=us-east1
+MODEL_NAME=taxifare
+VERSION_NAME=dnn
+
+# Create GCS bucket if it doesn't exist already...
+exists=$(gsutil ls -d | grep -w gs://${BUCKET}/)
+
+if [ -n "$exists" ]; then
+    echo -e "Bucket exists, let's not recreate it."
+else
+    echo "Creating a new GCS bucket."
+    gsutil mb -l ${REGION} gs://${BUCKET}
+    echo "Here are your current buckets:"
+    gsutil ls
+fi
+
+if [[ $(gcloud ai-platform models list --format='value(name)' --region=$REGION | grep $MODEL_NAME) ]]; then
+    echo "$MODEL_NAME already exists"
+else
+    echo "Creating $MODEL_NAME"
+    gcloud ai-platform models create --region=$REGION $MODEL_NAME
+fi
+
+if [[ $(gcloud ai-platform versions list --model $MODEL_NAME --region=$REGION --format='value(name)' | grep $VERSION_NAME) ]]; then
+    echo "Deleting already existing $MODEL_NAME:$VERSION_NAME ... "
+    echo yes | gcloud ai-platform versions delete --model=$MODEL_NAME $VERSION_NAME --region=$REGION
+    echo "Please run this cell again if you don't see a Creating message ... "
+    sleep 2
+fi
+
+echo "Creating $MODEL_NAME:$VERSION_NAME"
+gcloud ai-platform versions create --model=$MODEL_NAME $VERSION_NAME \
+       --framework=tensorflow --python-version=3.7 --runtime-version=2.1 \
+       --origin=$EXPORT_PATH --staging-bucket=gs://$BUCKET --region=$REGION
+```
+14. Creating example to test prediction with
+```
+%%writefile input.json
+{"pickup_longitude": -73.982683, "pickup_latitude": 40.742104,"dropoff_longitude": -73.983766,"dropoff_latitude": 40.755174,"passenger_count": 3.0}  
+```
+15. the `gcloud ai-platform predict` sends a prediction request to AI platform for the given instances
+```
+!gcloud ai-platform predict \
+    --model taxifare \
+    --json-instances input.json \
+    --version dnn \
+    --region us-east1
+```

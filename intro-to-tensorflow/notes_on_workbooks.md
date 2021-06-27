@@ -987,3 +987,303 @@ gcloud ai-platform versions create --model=$MODEL_NAME $VERSION_NAME \
     --version dnn \
     --region us-east1
 ```
+### basic_intro_logistic_regression.ipynb
+[basic_intro_logistic_regression](./basic_intro_logistic_regression.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/basic_intro_logistic_regression.ipynb)
+1. Download dataset
+```
+train_dataset_url = "https://storage.googleapis.com/download.tensorflow.org/data/iris_training.csv"
+
+# Download the training dataset file using the `tf.keras.utils.get_file` function. This returns the file path of the downloaded file.
+train_dataset_fp = tf.keras.utils.get_file(fname=os.path.basename(train_dataset_url),
+                                           origin=train_dataset_url)
+
+print("Local copy of the dataset file: {}".format(train_dataset_fp))
+```
+2. Create feature and label names
+```
+# Column order in CSV file
+column_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'species']
+
+feature_names = column_names[:-1]
+label_name = column_names[-1]
+
+# Let's output the value of `Features` and `Label`
+print("Features: {}".format(feature_names))
+print("Label: {}".format(label_name))
+```
+3. Create `tf.data.Dataset`
+```
+batch_size = 32
+
+# The `tf.data.experimental.make_csv_dataset()` method reads CSV files into a dataset
+train_dataset = tf.data.experimental.make_csv_dataset(
+    train_dataset_fp,
+    batch_size,
+    column_names=column_names,
+    label_name=label_name,
+    num_epochs=1)
+```
+4. Creating DNN model in keras
+```
+# Here `tf.keras.Sequential` used to sequentially groups a linear stack of layers into a tf.keras.Model.
+model = tf.keras.Sequential([
+# `tf.keras.layers.Dense` is inherited from: `Layer`
+# `tf.keras.layers.Dense` is your regular densely-connected NN layer.
+  tf.keras.layers.Dense(10, activation=tf.nn.relu, input_shape=(4,)),  # input shape required
+  tf.keras.layers.Dense(10, activation=tf.nn.relu),
+  tf.keras.layers.Dense(3)
+])
+```
+5. Let's have a quick look at what this model does to a batch of features. **Returns a logit for each class**. [More about logit](https://developers.google.com/machine-learning/glossary#logits)
+```
+predictions = model(features)
+predictions[:5]
+```
+6. To convert these logits to a probability for each class, use the softmax function. [More about softmax](https://developers.google.com/machine-learning/glossary#softmax). **However the results from this cell won't be accurate as model has not been trained**
+```
+# `tf.nn.softmax()` will compute softmax activations.
+tf.nn.softmax(predictions[:5])
+```
+7. ## Train the model
+
+[Training](https://developers.google.com/machine-learning/crash-course/glossary#training) is the stage of machine learning when the model is gradually optimized, or the model *learns* the dataset. The goal is to learn enough about the structure of the training dataset to make predictions about unseen data. If you learn *too much* about the training dataset, then the predictions only work for the data it has seen and will not be generalizable. This problem is called [overfitting](https://developers.google.com/machine-learning/crash-course/glossary#overfitting)—it's like memorizing the answers instead of understanding how to solve a problem.
+
+The Iris classification problem is an example of [supervised machine learning](https://developers.google.com/machine-learning/glossary/#supervised_machine_learning): the model is trained from examples that contain labels. In [unsupervised machine learning](https://developers.google.com/machine-learning/glossary/#unsupervised_machine_learning), the examples don't contain labels. Instead, the model typically finds patterns among the features.
+
+### Define the loss and gradient function
+
+Both training and evaluation stages need to calculate the model's [loss](https://developers.google.com/machine-learning/crash-course/glossary#loss). This measures how off a model's predictions are from the desired label, in other words, how bad the model is performing. We want to minimize, or optimize, this value.
+
+Our model will calculate its loss using the `tf.keras.losses.SparseCategoricalCrossentropy` function which takes the model's class probability predictions and the desired label, and returns the average loss across the examples.
+
+```
+# `tf.keras.losses.SparseCategoricalCrossentropy()` will computes the crossentropy loss between the labels and predictions.
+loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+```
+```
+def loss(model, x, y, training):
+  # TODO 2
+  # training=training is needed only if there are layers with different
+  # behavior during training versus inference (e.g. Dropout).
+  y_ = model(x, training=training)
+
+  return loss_object(y_true=y, y_pred=y_)
+
+
+l = loss(model, features, labels, training=False)
+print("Loss test: {}".format(l))
+```
+
+Use the `tf.GradientTape` context to calculate the [gradients](https://developers.google.com/machine-learning/crash-course/glossary#gradient) used to optimize your model:
+
+```
+def grad(model, inputs, targets):
+  with tf.GradientTape() as tape:
+    loss_value = loss(model, inputs, targets, training=True)
+  return loss_value, tape.gradient(loss_value, model.trainable_variables)
+```
+8. ### Create an optimizer
+
+An [optimizer](https://developers.google.com/machine-learning/crash-course/glossary#optimizer) applies the computed gradients to the model's variables to minimize the `loss` function. You can think of the loss function as a curved surface (see Figure 3) and we want to find its lowest point by walking around. The gradients point in the direction of steepest ascent—so we'll travel the opposite way and move down the hill. By iteratively calculating the loss and gradient for each batch, we'll adjust the model during training. Gradually, the model will find the best combination of weights and bias to minimize loss. And the lower the loss, the better the model's predictions.
+
+<table>
+  <tr><td>
+    <img src="https://cs231n.github.io/assets/nn3/opt1.gif" width="70%"
+         alt="Optimization algorithms visualized over time in 3D space.">
+  </td></tr>
+  <tr><td align="center">
+    <b>Figure 3.</b> Optimization algorithms visualized over time in 3D space.<br/>(Source: <a href="http://cs231n.github.io/neural-networks-3/">Stanford class CS231n</a>, MIT License, Image credit: <a href="https://twitter.com/alecrad">Alec Radford</a>)
+  </td></tr>
+</table>
+
+TensorFlow has many optimization algorithms available for training. This model uses the `tf.keras.optimizers.SGD` that implements the [stochastic gradient descent](https://developers.google.com/machine-learning/crash-course/glossary#gradient_descent) (SGD) algorithm. The `learning_rate` sets the step size to take for each iteration down the hill. This is a *hyperparameter* that you'll commonly adjust to achieve better results.
+
+```
+# `tf.keras.optimizers.SGD()` will Gradient descent (with momentum) optimizer.
+optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
+```
+
+We'll use this to calculate a single optimization step:
+
+```
+loss_value, grads = grad(model, features, labels)
+
+# Let's output the value of `Initial Loss` at `step 0`
+print("Step: {}, Initial Loss: {}".format(optimizer.iterations.numpy(),
+                                          loss_value.numpy()))
+
+optimizer.apply_gradients(zip(grads, model.trainable_variables))
+
+# Let's output the value of `Loss` at `step 1`
+print("Step: {},Loss: {}".format(optimizer.iterations.numpy(),
+                                          loss(model, features, labels, training=True).numpy()))
+```
+9. ### Training loop
+
+With all the pieces in place, the model is ready for training! A training loop feeds the dataset examples into the model to help it make better predictions. The following code block sets up these training steps:
+
+1. Iterate each *epoch*. An epoch is one pass through the dataset.
+2. Within an epoch, iterate over each example in the training `Dataset` grabbing its *features* (`x`) and *label* (`y`).
+3. Using the example's features, make a prediction and compare it with the label. Measure the inaccuracy of the prediction and use that to calculate the model's loss and gradients.
+4. Use an `optimizer` to update the model's variables.
+5. Keep track of some stats for visualization.
+6. Repeat for each epoch.
+
+The `num_epochs` variable is the number of times to loop over the dataset collection. Counter-intuitively, training a model longer does not guarantee a better model. `num_epochs` is a [hyperparameter](https://developers.google.com/machine-learning/glossary/#hyperparameter) that you can tune. Choosing the right number usually requires both experience and experimentation:
+
+```
+## Note: Rerunning this cell uses the same model variables
+
+# Keep results for plotting
+train_loss_results = []
+train_accuracy_results = []
+
+num_epochs = 201
+
+for epoch in range(num_epochs):
+  epoch_loss_avg = tf.keras.metrics.Mean()
+  epoch_accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
+
+  # Training loop - using batches of 32
+  for x, y in train_dataset:
+    # Optimize the model
+    loss_value, grads = grad(model, x, y)
+    optimizer.apply_gradients(zip(grads, model.trainable_variables))
+
+    # Track progress
+    epoch_loss_avg.update_state(loss_value)  # Add current batch loss
+    # Compare predicted label to actual label
+    # training=True is needed only if there are layers with different
+    # behavior during training versus inference (e.g. Dropout).
+    epoch_accuracy.update_state(y, model(x, training=True))
+
+  # End epoch
+  train_loss_results.append(epoch_loss_avg.result())
+  train_accuracy_results.append(epoch_accuracy.result())
+
+  if epoch % 50 == 0:
+    print("Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(epoch,
+                                                                epoch_loss_avg.result(),
+                                                                epoch_accuracy.result()))
+```
+10. ### Visualize the loss function over time
+While it's helpful to print out the model's training progress, it's often *more* helpful to see this progress. [TensorBoard](https://www.tensorflow.org/tensorboard) is a nice visualization tool that is packaged with TensorFlow, but we can create basic charts using the `matplotlib` module.
+
+Interpreting these charts takes some experience, but you really want to see the *loss* go down and the *accuracy* go up:
+```
+fig, axes = plt.subplots(2, sharex=True, figsize=(12, 8))
+fig.suptitle('Training Metrics')
+
+axes[0].set_ylabel("Loss", fontsize=14)
+axes[0].plot(train_loss_results)
+
+axes[1].set_ylabel("Accuracy", fontsize=14)
+axes[1].set_xlabel("Epoch", fontsize=14)
+axes[1].plot(train_accuracy_results)
+# `plt.show()` will display a figure
+plt.show()
+```
+11. ## Evaluate the model's effectiveness
+
+Now that the model is trained, we can get some statistics on its performance.
+
+*Evaluating* means determining how effectively the model makes predictions. To determine the model's effectiveness at Iris classification, pass some sepal and petal measurements to the model and ask the model to predict what Iris species they represent. Then compare the model's predictions against the actual label.  For example, a model that picked the correct species on half the input examples has an [accuracy](https://developers.google.com/machine-learning/glossary/#accuracy) of `0.5`. Figure 4 shows a slightly more effective model, getting 4 out of 5 predictions correct at 80% accuracy:
+
+<table cellpadding="8" border="0">
+  <colgroup>
+    <col span="4" >
+    <col span="1" bgcolor="lightblue">
+    <col span="1" bgcolor="lightgreen">
+  </colgroup>
+  <tr bgcolor="lightgray">
+    <th colspan="4">Example features</th>
+    <th colspan="1">Label</th>
+    <th colspan="1" >Model prediction</th>
+  </tr>
+  <tr>
+    <td>5.9</td><td>3.0</td><td>4.3</td><td>1.5</td><td align="center">1</td><td align="center">1</td>
+  </tr>
+  <tr>
+    <td>6.9</td><td>3.1</td><td>5.4</td><td>2.1</td><td align="center">2</td><td align="center">2</td>
+  </tr>
+  <tr>
+    <td>5.1</td><td>3.3</td><td>1.7</td><td>0.5</td><td align="center">0</td><td align="center">0</td>
+  </tr>
+  <tr>
+    <td>6.0</td> <td>3.4</td> <td>4.5</td> <td>1.6</td> <td align="center">1</td><td align="center" bgcolor="red">2</td>
+  </tr>
+  <tr>
+    <td>5.5</td><td>2.5</td><td>4.0</td><td>1.3</td><td align="center">1</td><td align="center">1</td>
+  </tr>
+  <tr><td align="center" colspan="6">
+    <b>Figure 4.</b> An Iris classifier that is 80% accurate.<br/>&nbsp;
+  </td></tr>
+</table>
+
+12. ### Setup the test dataset
+
+Evaluating the model is similar to training the model. The biggest difference is the examples come from a separate [test set](https://developers.google.com/machine-learning/crash-course/glossary#test_set) rather than the training set. To fairly assess a model's effectiveness, the examples used to evaluate a model must be different from the examples used to train the model.
+
+The setup for the test `Dataset` is similar to the setup for training `Dataset`. Download the CSV text file and parse that values, then give it a little shuffle:
+```
+test_url = "https://storage.googleapis.com/download.tensorflow.org/data/iris_test.csv"
+
+# The `tf.keras.utils.get_file` will downloads a file from a URL if it not already in the cache.
+test_fp = tf.keras.utils.get_file(fname=os.path.basename(test_url),
+                                  origin=test_url)
+```
+```
+# The `tf.data.experimental.make_csv_dataset()` method reads CSV files into a dataset
+test_dataset = tf.data.experimental.make_csv_dataset(
+    test_fp,
+    batch_size,
+    column_names=column_names,
+    label_name='species',
+    num_epochs=1,
+    shuffle=False)
+
+# The `map()` method will pack the `features` into the training dataset:
+test_dataset = test_dataset.map(pack_features_vector)
+```
+13. ### Evaluate the model on the test dataset
+
+Unlike the training stage, the model only evaluates a single [epoch](https://developers.google.com/machine-learning/glossary/#epoch) of the test data. In the following code cell, we iterate over each example in the test set and compare the model's prediction against the actual label. This is used to measure the model's accuracy across the entire test set:
+```
+test_accuracy = tf.keras.metrics.Accuracy()
+
+for (x, y) in test_dataset:
+  # training=False is needed only if there are layers with different
+  # behavior during training versus inference (e.g. Dropout).
+  logits = model(x, training=False)
+  prediction = tf.argmax(logits, axis=1, output_type=tf.int32)
+  test_accuracy(prediction, y)
+
+print("Test set accuracy: {:.3%}".format(test_accuracy.result()))
+```
+14. ## Use the trained model to make predictions
+
+We've trained a model and "proven" that it's good—but not perfect—at classifying Iris species. Now let's use the trained model to make some predictions on [unlabeled examples](https://developers.google.com/machine-learning/glossary/#unlabeled_example); that is, on examples that contain features but not a label.
+
+In real-life, the unlabeled examples could come from lots of different sources including apps, CSV files, and data feeds. For now, we're going to manually provide three unlabeled examples to predict their labels. Recall, the label numbers are mapped to a named representation as:
+
+* `0`: Iris setosa
+* `1`: Iris versicolor
+* `2`: Iris virginica
+```
+predict_dataset = tf.convert_to_tensor([
+    [5.1, 3.3, 1.7, 0.5,],
+    [5.9, 3.0, 4.2, 1.5,],
+    [6.9, 3.1, 5.4, 2.1]
+])
+
+# training=False is needed only if there are layers with different
+# behavior during training versus inference (e.g. Dropout).
+predictions = model(predict_dataset, training=False)
+
+for i, logits in enumerate(predictions):
+  class_idx = tf.argmax(logits).numpy()
+  p = tf.nn.softmax(logits)[class_idx]
+  name = class_names[class_idx]
+  print("Example {} prediction: {} ({:4.1f}%)".format(i, name, 100*p))
+```

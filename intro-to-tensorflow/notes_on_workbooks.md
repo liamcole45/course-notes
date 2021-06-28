@@ -1287,3 +1287,343 @@ for i, logits in enumerate(predictions):
   name = class_names[class_idx]
   print("Example {} prediction: {} ({:4.1f}%)".format(i, name, 100*p))
 ```
+### adv_logistic_reg_TF2.0.ipynb
+[adv_logistic_reg_TF2.0](./adv_logistic_reg_TF2.0.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/adv_logistic_reg_TF2.0.ipynb)
+
+## Learning Objectives
+
+1. Load a CSV file using Pandas
+2. Create train, validation, and test sets
+3. Define and train a model using Keras (including setting class weights)
+4. Evaluate the model using various metrics (including precision and recall)
+5. Try common techniques for dealing with imbalanced data like:
+    Class weighting and
+    Oversampling
+
+## Introduction 
+This lab how to classify a highly imbalanced dataset in which the number of examples in one class greatly outnumbers the examples in another. You will work with the [Credit Card Fraud Detection](https://www.kaggle.com/mlg-ulb/creditcardfraud)
+
+1. Examining class imbalance
+```
+# numpy bincount() method is used to obtain the frequency of each element provided inside a numpy array
+neg, pos = np.bincount(raw_df['Class'])
+total = neg + pos
+print('Examples:\n    Total: {}\n    Positive: {} ({:.2f}% of total)\n'.format(
+    total, pos, 100 * pos / total))
+```
+2. ### Clean, split and normalize the data
+
+The raw data has a few issues. First the `Time` and `Amount` columns are too variable to use directly. **Drop the `Time` column (since it's not clear what it means) and take the log of the `Amount` column to reduce its range.**
+```
+cleaned_df = raw_df.copy()
+
+# You don't want the `Time` column.
+cleaned_df.pop('Time')
+
+# The `Amount` column covers a huge range. Convert to log-space.
+eps=0.001 # 0 => 0.1¢
+cleaned_df['Log Ammount'] = np.log(cleaned_df.pop('Amount')+eps)
+```
+3. Splitting train, test, validation sets and from numpy arrays of labels and features
+```
+# Use a utility from sklearn to split and shuffle our dataset.
+from sklearn.model_selection import train_test_split
+
+train_df, test_df = train_test_split(cleaned_df, test_size = 0.2)
+train_df, val_df = train_test_split(train_df, test_size = 0.2)
+
+# Form np arrays of labels and features.
+train_labels = np.array(train_df.pop('Class'))
+bool_train_labels = train_labels != 0
+val_labels = np.array(val_df.pop('Class'))
+test_labels = np.array(test_df.pop('Class'))
+
+train_features = np.array(train_df)
+val_features = np.array(val_df)
+test_features = np.array(test_df)
+```
+4. `liam-functions` To get an idea about arrays, especually numpy arrays. Unable to do pd.describe()
+```
+def array_info(array_name, name= "array"):
+    print(f"{name} ndim: ", array_name.ndim)
+    print(f"{name} shape:", array_name.shape)
+    print(f"{name} size: ", array_name.size)
+    print(f"{name} dtype: ", array_name.dtype)
+    print(f"{name} itemsize: ", array_name.itemsize, "bytes")
+    print(f"{name} nbytes: ", array_name.nbytes, "bytes")
+```
+5. Normalize the input features using the sklearn StandardScaler.
+This will set the mean to 0 and standard deviation to 1.
+
+Note: The `StandardScaler` is only fit using the `train_features` to be sure the model is not peeking at the validation or test sets. 
+```
+scaler = StandardScaler()
+train_features = scaler.fit_transform(train_features)
+
+val_features = scaler.transform(val_features)
+test_features = scaler.transform(test_features)
+
+# `np.clip` clip (limit) the values in the array
+train_features = np.clip(train_features, -5, 5)
+val_features = np.clip(val_features, -5, 5)
+test_features = np.clip(test_features, -5, 5)
+
+
+print('Training labels shape:', train_labels.shape)
+print('Validation labels shape:', val_labels.shape)
+print('Test labels shape:', test_labels.shape)
+
+print('Training features shape:', train_features.shape)
+print('Validation features shape:', val_features.shape)
+print('Test features shape:', test_features.shape)
+```
+6. ### Look at the data distribution
+
+Next compare the distributions of the positive and negative examples over a few features. Good questions to ask yourself at this point are:
+
+* Do these distributions make sense? 
+    * Yes. You've normalized the input and these are mostly concentrated in the `+/- 2` range.
+* Can you see the difference between the distributions?
+    * Yes the positive examples contain a much higher rate of extreme values.
+```
+# pandas dataframe is a two dimensional size mutable, potentially heterogeneous tabluar data structure with 
+# labelled axis (rows and columns)
+pos_df = pd.DataFrame(train_features[ bool_train_labels], columns = train_df.columns)
+neg_df = pd.DataFrame(train_features[~bool_train_labels], columns = train_df.columns)
+
+# seaborns jointplot displays a relationship between 2 variables (bivariate) as well as 
+sns.jointplot(pos_df['V5'], pos_df['V6'],
+              kind='hex', xlim = (-5,5), ylim = (-5,5))
+# The suptitle() function in pyplot module of the matplotlib library is used to add a title to the figure
+plt.suptitle("Positive distribution")
+
+sns.jointplot(neg_df['V5'], neg_df['V6'],
+              kind='hex', xlim = (-5,5), ylim = (-5,5))
+_ = plt.suptitle("Negative distribution")
+```
+7. ## Define the model and metrics
+
+Define a function that creates a simple neural network with a densly connected hidden layer, a [dropout](https://developers.google.com/machine-learning/glossary/#dropout_regularization) layer to reduce overfitting, and an output sigmoid layer that returns the probability of a transaction being fraudulent: 
+```
+METRICS = [
+      keras.metrics.TruePositives(name='tp'),
+      keras.metrics.FalsePositives(name='fp'),
+      keras.metrics.TrueNegatives(name='tn'),
+      keras.metrics.FalseNegatives(name='fn'), 
+      keras.metrics.BinaryAccuracy(name='accuracy'),
+      keras.metrics.Precision(name='precision'),
+      keras.metrics.Recall(name='recall'),
+      keras.metrics.AUC(name='auc'),
+]
+
+def make_model(metrics = METRICS, output_bias=None):
+    if output_bias is not None:
+    # `tf.keras.initialisers.Constant()` generates tensors with constant values
+        output_bias = tf.keras.initializers.Constant(output_bias)
+    # creating a sequential model
+    model = keras.Sequential([
+      tf.keras.layers.Dense(16, activation='relu', input_shape=(train_features.shape[-1],)),  # input shape required
+      tf.keras.layers.Dropout(0.5),
+      tf.keras.layers.Dense(1, activation='sigmoid', bias_initializer=output_bias),
+    ])
+# compile 
+    model.compile(
+      optimizer=keras.optimizers.Adam(lr=1e-3),
+      loss=keras.losses.BinaryCrossentropy(),
+      metrics=metrics)
+
+    return model
+```
+7. Notice that the model is fit using a larger than default batch size of 2048, this is important to ensure that each batch has a decent chance of containing a few positive samples. If the batch size was too small, they would likely have no fraudulent transactions to learn from.
+
+**Note: this model will not handle the class imbalance well. You will improve it later in this tutorial.**
+
+**stop training when a monitored metric has stopped improving**
+```
+EPOCHS = 100
+BATCH_SIZE = 2048
+
+# stop training when a monitored metric has stopped improving
+early_stopping = tf.keras.callbacks.EarlyStopping(
+    monitor='val_auc', 
+    verbose=1,
+    patience=10,
+    mode='max',
+    restore_best_weights=True)
+```
+8. display a model summary
+```
+model = make_model()
+model.summary()
+```
+8. ### Optional: Set the correct initial bias.
+These are initial guesses are not great. You know the dataset is imbalanced. Set the output layer's bias to reflect that (See: [A Recipe for Training Neural Networks: "init well"](http://karpathy.github.io/2019/04/25/recipe/#2-set-up-the-end-to-end-trainingevaluation-skeleton--get-dumb-baselines)). This can help with initial convergence.
+
+#### More notes from website about `init well`
+
+Initialize the final layer weights correctly. E.g. if you are regressing some values that have a mean of 50 then initialize the final bias to 50. If you have an imbalanced dataset of a ratio 1:10 of positives:negatives, set the bias on your logits such that your network predicts probability of 0.1 at initialization. Setting these correctly will speed up convergence and eliminate “hockey stick” loss curves where in the first few iteration your network is basically just learning the bias.
+
+With the default bias initialization the loss should be about `math.log(2) = 0.69314` 
+```
+results = model.evaluate(train_features, train_labels, batch_size=BATCH_SIZE, verbose=0)
+print("Loss: {:0.4f}".format(results[0]))
+```
+The correct bias to set can be derived from:
+
+$$ p_0 = pos/(pos + neg) = 1/(1+e^{-b_0}) $$
+$$ b_0 = -log_e(1/p_0 - 1) $$
+$$ b_0 = log_e(pos/neg)$$
+```
+# np.log() is a mathematical function that is used to calculate the natural logarithm
+initial_bias = np.log([pos/neg])
+initial_bias
+```
+Set that as the initial bias, and the model will give much more reasonable initial guesses. 
+
+It should be near: `pos/total = 0.0018`
+```
+model = make_model(output_bias = initial_bias)
+model.predict(train_features[:10])
+```
+9. Plot loss function
+```
+def plot_loss(history, label, n):
+  # Use a log scale to show the wide range of values.
+  plt.semilogy(history.epoch,  history.history['loss'],
+               color=colors[n], label='Train '+label)
+  plt.semilogy(history.epoch,  history.history['val_loss'],
+          color=colors[n], label='Val '+label,
+          linestyle="--")
+  plt.xlabel('Epoch')
+  plt.ylabel('Loss')
+  
+  plt.legend()
+```
+```
+plot_loss(zero_bias_history, "Zero Bias", 0)
+plot_loss(careful_bias_history, "Careful Bias", 1)
+```
+10. ### Plot the ROC
+
+Now plot the [ROC](https://developers.google.com/machine-learning/glossary#ROC). This plot is useful because it shows, at a glance, the range of performance the model can reach just by tuning the output threshold.
+
+ROC function and example
+```
+def plot_roc(name, labels, predictions, **kwargs):
+  fp, tp, _ = sklearn.metrics.roc_curve(labels, predictions)
+
+  plt.plot(100*fp, 100*tp, label=name, linewidth=2, **kwargs)
+  plt.xlabel('False positives [%]')
+  plt.ylabel('True positives [%]')
+  plt.xlim([-0.5,20])
+  plt.ylim([80,100.5])
+  plt.grid(True)
+  ax = plt.gca()
+  ax.set_aspect('equal')
+```
+```
+plot_roc("Train Baseline", train_labels, train_predictions_baseline, color=colors[0])
+plot_roc("Test Baseline", test_labels, test_predictions_baseline, color=colors[0], linestyle='--')
+plt.legend(loc='lower right')
+```
+11. ### Calculate class weights
+
+The goal is to identify fradulent transactions, but you don't have very many of those positive samples to work with, so you would want to have the classifier heavily weight the few examples that are available. You can do this by passing Keras weights for each class through a parameter. **These will cause the model to "pay more attention" to examples from an under-represented class.**
+
+```
+# Scaling by total/2 helps keep the loss to a similar magnitude.
+# The sum of the weights of all examples stays the same.
+weight_for_0 = (1 / neg)*(total)/2
+weight_for_1 = (1 / pos)*(total)/2
+
+class_weight = {0: weight_for_0, 1: weight_for_1}
+
+print('Weight for class 0: {:.2f}'.format(weight_for_0))
+print('Weight for class 1: {:.2f}'.format(weight_for_1))
+```
+12. ### Train a model with class weights
+
+Now try re-training and evaluating the model with class weights to see how that affects the predictions.
+
+Note: Using `class_weights` changes the range of the loss. This may affect the stability of the training depending on the optimizer. Optimizers whose step size is dependent on the magnitude of the gradient, like `optimizers.SGD`, may fail. The optimizer used here, `optimizers.Adam`, is unaffected by the scaling change. Also note that because of the weighting, the total losses are not comparable between the two models.
+```
+weighted_model = make_model()
+weighted_model.load_weights(initial_weights)
+
+weighted_history = weighted_model.fit(
+    train_features,
+    train_labels,
+    batch_size=BATCH_SIZE,
+    epochs=EPOCHS,
+    callbacks = [early_stopping],
+    validation_data=(val_features, val_labels),
+    # The class weights go here
+    class_weight=class_weight) 
+```
+13. Evaluate metrics
+```
+train_predictions_weighted = weighted_model.predict(train_features, batch_size=BATCH_SIZE)
+test_predictions_weighted = weighted_model.predict(test_features, batch_size=BATCH_SIZE)
+```
+```
+weighted_results = weighted_model.evaluate(test_features, test_labels,
+                                           batch_size=BATCH_SIZE, verbose=0)
+for name, value in zip(weighted_model.metrics_names, weighted_results):
+  print(name, ': ', value)
+print()
+
+plot_cm(test_labels, test_predictions_weighted)
+```
+14. ### Oversample the minority class
+
+A related approach would be to resample the dataset by oversampling the minority class.
+```
+pos_features = train_features[bool_train_labels]
+neg_features = train_features[~bool_train_labels]
+
+pos_labels = train_labels[bool_train_labels]
+neg_labels = train_labels[~bool_train_labels]
+```
+#### Using NumPy
+
+You can balance the dataset manually by choosing the right number of random 
+indices from the positive examples:
+```
+# np.arrange() return evenly spaced values within a given interval
+ids = np.arange(len(pos_features))
+# choice method(), you can get the random samples of 1 dimensional array and return the random samples of numpy array
+choices = np.random.choice(ids, len(neg_features))
+
+res_pos_features = pos_features[choices]
+res_pos_labels = pos_labels[choices]
+
+res_pos_features.shape
+```
+```
+# numpy.concatenate() function concatenate a sequence of arrays along an existing axis
+resampled_features = np.concatenate([res_pos_features, neg_features], axis=0)
+resampled_labels = np.concatenate([res_pos_labels, neg_labels], axis=0)
+
+order = np.arange(len(resampled_labels))
+
+# numpy.random.shuffle() modify a sequence in-place by shuffling its contents
+np.random.shuffle(order)
+resampled_features = resampled_features[order]
+resampled_labels = resampled_labels[order]
+
+resampled_features.shape
+```
+15. ### Plotting baseline, resampled and weighted
+
+```
+plot_roc("Train Baseline", train_labels, train_predictions_baseline, color=colors[0])
+plot_roc("Test Baseline", test_labels, test_predictions_baseline, color=colors[0], linestyle='--')
+
+plot_roc("Train Weighted", train_labels, train_predictions_weighted, color=colors[1])
+plot_roc("Test Weighted", test_labels, test_predictions_weighted, color=colors[1], linestyle='--')
+
+plot_roc("Train Resampled", train_labels, train_predictions_resampled,  color=colors[2])
+plot_roc("Test Resampled", test_labels, test_predictions_resampled,  color=colors[2], linestyle='--')
+plt.legend(loc='lower right')
+```

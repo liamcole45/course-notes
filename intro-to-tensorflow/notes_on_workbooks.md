@@ -1645,3 +1645,161 @@ In this section, I want to give you some tips to get the most out of the functio
     Review Graph Plots. Always create a plot of the model graph and review it to ensure that everything was put together as you intended.
     Name the layers. You can assign names to layers that are used when reviewing summaries and plots of the model graph. For example: Dense(1, name=’hidden1′).
     Separate Submodels. Consider separating out the development of submodels and combine the submodels together at the end.
+
+### 4_keras_functional_api.ipynb
+[4_keras_functional_api](./4_keras_functional_api.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/4_keras_functional_api.ipynb)
+
+1. Processes features and labels function
+```
+def features_and_labels(row_data):
+    label = row_data.pop(LABEL_COLUMN)
+    features = row_data
+        
+    for unwanted_col in UNWANTED_COLS:
+        features.pop(unwanted_col)
+
+    return features, label
+```
+2. `create_dataset` splits into training dataset function
+```
+def create_dataset(pattern, batch_size=1, mode='eval'):
+    dataset = tf.data.experimental.make_csv_dataset(
+        pattern, batch_size, CSV_COLUMNS, DEFAULTS)
+
+    dataset = dataset.map(features_and_labels)
+    
+    if mode == 'train':
+        dataset = dataset.shuffle(buffer_size=1000).repeat()
+
+    # take advantage of multi-threading; 1=AUTOTUNE
+    dataset = dataset.prefetch(1)
+    return dataset
+```
+3. Create Feature columns for Wide and Deep model. 
+```
+from tensorflow import feature_column as fc
+
+# 1. Bucketize latitudes and longitudes
+NBUCKETS = 16
+latbuckets = np.linspace(start=38.0, stop=42.0, num=NBUCKETS).tolist()
+lonbuckets = np.linspace(start=-76.0, stop=-72.0, num=NBUCKETS).tolist()
+
+fc_bucketized_plat = fc.bucketized_column(source_column=fc.numeric_column('pickup_latitude'), 
+                                                         boundaries=latbuckets)
+fc_bucketized_plon = fc.bucketized_column(source_column=fc.numeric_column('pickup_longitude'), 
+                                                         boundaries=lonbuckets)
+fc_bucketized_dlat = fc.bucketized_column(source_column=fc.numeric_column('dropoff_latitude'),
+                                                         boundaries=latbuckets)
+fc_bucketized_dlon = fc.bucketized_column(source_column=fc.numeric_column('dropoff_longitude'),
+                                                         boundaries=lonbuckets)
+
+# 2. Cross features for locations
+fc_crossed_dloc = fc.crossed_column([fc_bucketized_dlat,fc_bucketized_dlon],
+                                                   hash_bucket_size=NBUCKETS * NBUCKETS)
+fc_crossed_ploc = fc.crossed_column([fc_bucketized_plat,fc_bucketized_plon],
+                                                   hash_bucket_size=NBUCKETS * NBUCKETS)
+fc_crossed_pd_pair = fc.crossed_column([fc_crossed_dloc,fc_crossed_ploc],
+                                                     hash_bucket_size=NBUCKETS**4) # to the power of
+
+# 3. Create embedding columns for the crossed columns
+# not sure how dimension is calculated
+fc_pd_pair = fc.embedding_column(categorical_column=fc_crossed_pd_pair, dimension=3) 
+fc_dloc = fc.embedding_column(categorical_column=fc_crossed_dloc, dimension=3)
+fc_ploc = fc.embedding_column(categorical_column=fc_crossed_ploc, dimension=3)
+```
+4. Collect the wide and deep columns into two separate lists
+```
+wide_columns = [
+    # One-hot encoded feature crosses
+    fc.indicator_column(fc_crossed_dloc),
+    fc.indicator_column(fc_crossed_ploc), 
+    fc.indicator_column(fc_crossed_pd_pair)
+]
+
+deep_columns = [
+    # Embedding_column to "group" together ...
+    # not sure how dimension is calculated
+    fc.embedding_column(fc_crossed_pd_pair, dimension=10),
+
+    # Numeric columns
+    fc.numeric_column('pickup_latitude'),
+    fc.numeric_column('pickup_longitude'),
+    fc.numeric_column('dropoff_latitude'),
+    fc.numeric_column('dropoff_longitude')
+]
+```
+5. Build the model
+```def rmse(y_true, y_pred):
+    return tf.sqrt(tf.reduce_mean(tf.square(y_pred - y_true)))
+
+def build_model(dnn_hidden_units):
+    # Create the deep part of model
+    # A layer that produces a dense Tensor based on given feature_columns.
+    deep = DenseFeatures(deep_columns, name='deep_inputs')(inputs)
+    for num_nodes in dnn_hidden_units:
+        deep = Dense(num_nodes, activation='relu')(deep)
+    
+    # Create the wide part of model
+    wide = DenseFeatures(wide_columns, name='wide_inputs')(inputs)
+
+    # Combine deep and wide parts of the model
+    combined = concatenate(inputs=[deep, wide], name='combined')
+
+    # Map the combined outputs into a single prediction value
+    output = Dense(units=1, activation=None, name='prediction')(combined)
+    
+    # Finalize the model
+    model = Model(inputs=list(inputs.values()), outputs=output)
+
+    # Compile the keras model
+    model.compile(optimizer='adam', loss="mse", metrics=[rmse, 'mse'])
+    
+    return model
+```
+6. Plot model diagram
+```
+HIDDEN_UNITS = [10,10]
+
+model = build_model(dnn_hidden_units=HIDDEN_UNITS)
+
+tf.keras.utils.plot_model(model, show_shapes=False, rankdir='LR')
+```
+7. We'll set up our training variables, create our datasets for training and validation, and train our model.
+
+(We refer you the the blog post [ML Design Pattern #3: Virtual Epochs](https://medium.com/google-cloud/ml-design-pattern-3-virtual-epochs-f842296de730) for further details on why express the training in terms of `NUM_TRAIN_EXAMPLES` and `NUM_EVALS` and why, in this training code, the number of epochs is really equal to the number of evaluations we perform.)
+```
+BATCH_SIZE = 1000
+NUM_TRAIN_EXAMPLES = 10000 * 5  # training dataset will repeat, wrap around
+NUM_EVALS = 50  # how many times to evaluate
+NUM_EVAL_EXAMPLES = 10000  # enough to get a reasonable sample
+
+trainds = create_dataset(
+    pattern='../data/taxi-train*',
+    batch_size=BATCH_SIZE,
+    mode='train')
+
+evalds = create_dataset(
+    pattern='../data/taxi-valid*',
+    batch_size=BATCH_SIZE,
+    mode='eval').take(NUM_EVAL_EXAMPLES//1000)
+```
+```
+%%time
+steps_per_epoch = NUM_TRAIN_EXAMPLES // (BATCH_SIZE * NUM_EVALS)
+
+OUTDIR = "./taxi_trained"
+shutil.rmtree(path=OUTDIR, ignore_errors=True) # start fresh each time
+
+history = model.fit(x=trainds,
+                    steps_per_epoch=steps_per_epoch,
+                    epochs=NUM_EVALS,
+                    validation_data=evalds,
+                    callbacks=[TensorBoard(OUTDIR)])
+```
+8. Graph of `MSE` and `RSME`
+```
+RMSE_COLS = ['rmse', 'val_rmse']
+
+pd.DataFrame(history.history)[RMSE_COLS].plot()
+```

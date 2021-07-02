@@ -1293,11 +1293,11 @@ Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-anal
 
 ## Learning Objectives
 
-1. Load a CSV file using Pandas
-2. Create train, validation, and test sets
-3. Define and train a model using Keras (including setting class weights)
-4. Evaluate the model using various metrics (including precision and recall)
-5. Try common techniques for dealing with imbalanced data like:
+- Load a CSV file using Pandas
+- Create train, validation, and test sets
+- Define and train a model using Keras (including setting class weights)
+- Evaluate the model using various metrics (including precision and recall)
+- Try common techniques for dealing with imbalanced data like:
     Class weighting and
     Oversampling
 
@@ -1435,7 +1435,7 @@ def make_model(metrics = METRICS, output_bias=None):
 
     return model
 ```
-7. Notice that the model is fit using a larger than default batch size of 2048, this is important to ensure that each batch has a decent chance of containing a few positive samples. If the batch size was too small, they would likely have no fraudulent transactions to learn from.
+8. 7b Notice that the model is fit using a larger than default batch size of 2048, this is important to ensure that each batch has a decent chance of containing a few positive samples. If the batch size was too small, they would likely have no fraudulent transactions to learn from.
 
 **Note: this model will not handle the class imbalance well. You will improve it later in this tutorial.**
 
@@ -1452,12 +1452,12 @@ early_stopping = tf.keras.callbacks.EarlyStopping(
     mode='max',
     restore_best_weights=True)
 ```
-8. display a model summary
+9. display a model summary
 ```
 model = make_model()
 model.summary()
 ```
-8. ### Optional: Set the correct initial bias.
+10. ### Optional: Set the correct initial bias.
 These are initial guesses are not great. You know the dataset is imbalanced. Set the output layer's bias to reflect that (See: [A Recipe for Training Neural Networks: "init well"](http://karpathy.github.io/2019/04/25/recipe/#2-set-up-the-end-to-end-trainingevaluation-skeleton--get-dumb-baselines)). This can help with initial convergence.
 
 #### More notes from website about `init well`
@@ -1486,7 +1486,7 @@ It should be near: `pos/total = 0.0018`
 model = make_model(output_bias = initial_bias)
 model.predict(train_features[:10])
 ```
-9. Plot loss function
+11. Plot loss function
 ```
 def plot_loss(history, label, n):
   # Use a log scale to show the wide range of values.
@@ -1504,7 +1504,7 @@ def plot_loss(history, label, n):
 plot_loss(zero_bias_history, "Zero Bias", 0)
 plot_loss(careful_bias_history, "Careful Bias", 1)
 ```
-10. ### Plot the ROC
+12. ### Plot the ROC
 
 Now plot the [ROC](https://developers.google.com/machine-learning/glossary#ROC). This plot is useful because it shows, at a glance, the range of performance the model can reach just by tuning the output threshold.
 
@@ -1527,7 +1527,7 @@ plot_roc("Train Baseline", train_labels, train_predictions_baseline, color=color
 plot_roc("Test Baseline", test_labels, test_predictions_baseline, color=colors[0], linestyle='--')
 plt.legend(loc='lower right')
 ```
-11. ### Calculate class weights
+13. ### Calculate class weights
 
 The goal is to identify fradulent transactions, but you don't have very many of those positive samples to work with, so you would want to have the classifier heavily weight the few examples that are available. You can do this by passing Keras weights for each class through a parameter. **These will cause the model to "pay more attention" to examples from an under-represented class.**
 
@@ -1542,7 +1542,7 @@ class_weight = {0: weight_for_0, 1: weight_for_1}
 print('Weight for class 0: {:.2f}'.format(weight_for_0))
 print('Weight for class 1: {:.2f}'.format(weight_for_1))
 ```
-12. ### Train a model with class weights
+14. ### Train a model with class weights
 
 Now try re-training and evaluating the model with class weights to see how that affects the predictions.
 
@@ -1561,7 +1561,7 @@ weighted_history = weighted_model.fit(
     # The class weights go here
     class_weight=class_weight) 
 ```
-13. Evaluate metrics
+15. Evaluate metrics
 ```
 train_predictions_weighted = weighted_model.predict(train_features, batch_size=BATCH_SIZE)
 test_predictions_weighted = weighted_model.predict(test_features, batch_size=BATCH_SIZE)
@@ -1575,7 +1575,7 @@ print()
 
 plot_cm(test_labels, test_predictions_weighted)
 ```
-14. ### Oversample the minority class
+16. ### Oversample the minority class
 
 A related approach would be to resample the dataset by oversampling the minority class.
 ```
@@ -1614,7 +1614,7 @@ resampled_labels = resampled_labels[order]
 
 resampled_features.shape
 ```
-15. ### Plotting baseline, resampled and weighted
+17. ### Plotting baseline, resampled and weighted
 
 ```
 plot_roc("Train Baseline", train_labels, train_predictions_baseline, color=colors[0])

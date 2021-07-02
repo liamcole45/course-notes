@@ -1627,3 +1627,21 @@ plot_roc("Train Resampled", train_labels, train_predictions_resampled,  color=co
 plot_roc("Test Resampled", test_labels, test_predictions_resampled,  color=colors[2], linestyle='--')
 plt.legend(loc='lower right')
 ```
+# Readings Notes
+[In this tutorial](https://machinelearningmastery.com/keras-functional-api-deep-learning/), you discovered how to use the functional API in Keras for defining simple and complex deep learning models.
+
+Specifically, you learned:
+
+    The difference between the Sequential and Functional APIs.
+    How to define simple Multilayer Perceptron, Convolutional Neural Network, and Recurrent Neural Network models using the functional API.
+    How to define more complex models with shared layers and multiple inputs and outputs.
+
+### Best Practices
+
+In this section, I want to give you some tips to get the most out of the functional API when you are defining your own models.
+
+    Consistent Variable Names. Use the same variable name for the input (visible) and output layers (output) and perhaps even the hidden layers (hidden1, hidden2). It will help to connect things together correctly.
+    Review Layer Summary. Always print the model summary and review the layer outputs to ensure that the model was connected together as you expected.
+    Review Graph Plots. Always create a plot of the model graph and review it to ensure that everything was put together as you intended.
+    Name the layers. You can assign names to layers that are used when reviewing summaries and plots of the model graph. For example: Dense(1, name=’hidden1′).
+    Separate Submodels. Consider separating out the development of submodels and combine the submodels together at the end.

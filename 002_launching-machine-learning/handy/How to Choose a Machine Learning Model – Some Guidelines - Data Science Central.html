@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml">
+<head data-layout-view="default" class="xj_layout_head">
+
+<script src="/cdn-cgi/apps/head/RyjYGQw_2NrK5R2qPtpdrWF8RuQ.js"></script><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-T5W4WQ');</script>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>How to Choose a Machine Learning Model &ndash; Some Guidelines - Data Science Central</title>
+<link rel="icon" href="https://www.datasciencecentral.com/favicon.ico" type="image/x-icon" />
+<link rel="SHORTCUT ICON" href="https://www.datasciencecentral.com/favicon.ico" type="image/x-icon" />
+<meta name="description" content=" 
+ 
+In this post, we explore some broad guidelines for selecting machine learning models
+ 
+The overall steps for Machine Learning/Deep Learning are:
+
+Collect…" />
+<meta name="title" content="How to Choose a Machine Learning Model &ndash; Some Guidelines" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.datasciencecentral.com/profiles/blogs/how-to-choose-a-machine-learning-model-some-guidelines" />
+<meta property="og:title" content="How to Choose a Machine Learning Model &ndash; Some Guidelines" />
+<meta property="og:image" content="http://storage.ning.com/topology/rest/1.0/file/get/2808372468?profile=original">
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="How to Choose a Machine Learning Model &ndash; Some Guidelines" />
+<meta name="twitter:description" content=" 
+ 
+In this post, we explore some broad guidelines for selecting machine learning models
+ 
+The overall steps for Machine Learning/Deep Learning are:
+
+Collect…" />
+<meta name="twitter:image" content="http://storage.ning.com/topology/rest/1.0/file/get/2808372468?profile=original" />
+<link rel="image_src" href="https://storage.ning.com/topology/rest/1.0/file/get/2808372468?profile=original" />
+<script type="text/javascript">
+    djConfig = { preventBackButtonFix: false, isDebug: false }
+ning = {"CurrentApp":{"premium":true,"iconUrl":"https:\/\/storage.ning.com\/topology\/rest\/1.0\/file\/get\/2751248758?profile=UPSCALE_150x150","url":"httpsdatasciencecentral.ning.com","domains":["www.datasciencecentral.com","datasciencecentral.com"],"online":true,"privateSource":true,"id":"datasciencecentral","appId":"6448529","description":"Welcome to Data Science Central. The Community of and for Data Scientist","name":"Data Science Central","owner":"2edcolrgc4o4b","createdDate":"2011-10-05T21:11:40.055Z","runOwnAds":false,"category":{"Visualization":null,"Integration":null,"Science":null,"Modeling":null,"Big":null,"Intelligence":null,"R":null,"Mining":null,"Analytics":null,"Data":null,"Business":null,"Predictive":null},"tags":["Visualization","Integration","Science","Modeling","Big","Intelligence","R","Mining","Analytics","Data","Business","Predictive"]},"CurrentProfile":null,"maxFileUploadSize":7};
+        (function(){
+            if (!window.ning) { return; }
+
+            var age, gender, rand, obfuscated, combined;
+
+            obfuscated = document.cookie.match(/xgdi=([^;]+)/);
+            if (obfuscated) {
+                var offset = 100000;
+                obfuscated = parseInt(obfuscated[1]);
+                rand = obfuscated / offset;
+                combined = (obfuscated % offset) ^ rand;
+                age = combined % 1000;
+                gender = (combined / 1000) & 3;
+                gender = (gender == 1 ? 'm' : gender == 2 ? 'f' : 0);
+                ning.viewer = {"age":age,"gender":gender};
+            }
+        })();
+
+        if (window.location.hash.indexOf('#!/') == 0) {
+        window.location.replace(window.location.hash.substr(2));
+    }
+    window.xg = window.xg || {};
+xg.captcha = {
+    'shouldShow': false,
+    'siteKey': '6Ldf3AoUAAAAALPgNx2gcXc8a_5XEcnNseR6WmsT'
+};
+xg.addOnRequire = function(f) { xg.addOnRequire.functions.push(f); };
+xg.addOnRequire.functions = [];
+xg.addOnFacebookLoad = function (f) { xg.addOnFacebookLoad.functions.push(f); };
+xg.addOnFacebookLoad.functions = [];
+xg._loader = {
+    p: 0,
+    loading: function(set) {  this.p++; },
+    onLoad: function(set) {
+                this.p--;
+        if (this.p == 0 && typeof(xg._loader.onDone) == 'function') {
+            xg._loader.onDone();
+        }
+    }
+};
+xg._loader.loading('xnloader');
+if (window.bzplcm) {
+    window.bzplcm._profileCount = 0;
+    window.bzplcm._profileSend = function() { if (window.bzplcm._profileCount++ == 1) window.bzplcm.send(); };
+}
+xg._loader.onDone = function() {
+            if(window.bzplcm)window.bzplcm.start('ni');
+        xg.shared.util.parseWidgets();    var addOnRequireFunctions = xg.addOnRequire.functions;
+    xg.addOnRequire = function(f) { f(); };
+    try {
+        if (addOnRequireFunctions) { dojo.lang.forEach(addOnRequireFunctions, function(onRequire) { onRequire.apply(); }); }
+    } catch (e) {
+        if(window.bzplcm)window.bzplcm.ts('nx').send();
+        throw e;
+    }
+    if(window.bzplcm) { window.bzplcm.stop('ni'); window.bzplcm._profileSend(); }
+};
+window.xn = { track: { event: function() {}, pageView: function() {}, registerCompletedFlow: function() {}, registerError: function() {}, timer: function() { return { lapTime: function() {} }; } } };</script>
+<meta name="medium" content="blog" /><link rel="alternate" type="application/atom+xml" title="Ajit jaokar&#039;s Posts - Data Science Central" href="https://www.datasciencecentral.com/profiles/blog/feed?user=32ac9fc41n4f4&amp;xn_auth=no" /><link rel="alternate" type="application/atom+xml" title="Comments - How to Choose a Machine Learning Model &ndash; Some Guidelines - Data Science Central" href="https://www.datasciencecentral.com/profiles/comment/feed?attachedTo=6448529%3ABlogPost%3A768280&amp;xn_auth=no" />
+<style type="text/css" media="screen,projection">
+@import url(https://static.ning.com/socialnetworkmain/widgets/index/css/common-982.min.css?xn_version=1168366271);
+@import url(https://static.ning.com/socialnetworkmain/widgets/profiles/css/component.min.css?xn_version=467783652);
+
+</style>
+<style type="text/css" media="screen,projection">
+@import url(/generated-603fa22a6f9347-57045003-css?xn_version=202103031431);
+
+</style>
+<style type="text/css" media="screen,projection">
+@import url(/generated-607613e2a77759-34058519-css?xn_version=202103031431);
+
+</style>
+<!--[if IE 6]>
+    <link rel="stylesheet" type="text/css" href="https://static.ning.com/socialnetworkmain/widgets/index/css/common-ie6.min.css?xn_version=463104712" />
+<![endif]-->
+<!--[if IE 7]>
+<link rel="stylesheet" type="text/css" href="https://static.ning.com/socialnetworkmain/widgets/index/css/common-ie7.css?xn_version=2712659298" />
+<![endif]-->
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.datasciencecentral.com/profiles/blog/rsd" />
+</head>
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T5W4WQ"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<div class="xj_before_content"><div id='fb-root'></div>
+<script>
+  window.fbAsyncInit = function () {
+    FB.init({
+      appId      : '259683271111061', 
+      status     : true,   
+      cookie     : true,   
+      xfbml      : true, 
+      version    : 'v2.3'  
+    });
+    var n = xg.addOnFacebookLoad.functions.length;
+    for (var i = 0; i < n; i++) {
+      xg.addOnFacebookLoad.functions[i]();
+    }
+    xg.addOnFacebookLoad = function (f) { f(); };
+    xg.addOnFacebookLoad.functions = [];
+  };
+  (function() {
+    var e = document.createElement('script');
+    e.src = document.location.protocol + '//connect.facebook.net/en_US/sdk.js';
+    e.async = true;
+    document.getElementById('fb-root').appendChild(e);
+  })();
+</script> <div id="xn_bar">
+<div id="xn_bar_menu">
+<div id="xn_bar_menu_branding">
+</div>
+<div id="xn_bar_menu_more">
+<form id="xn_bar_menu_search" method="GET" action="https://www.datasciencecentral.com/main/search/search">
+<fieldset>
+<input type="text" name="q" id="xn_bar_menu_search_query" value="Search Data Science Central" _hint="Search Data Science Central" accesskey="4" class="text xj_search_hint" />
+<a id="xn_bar_menu_search_submit" href="#" onclick="document.getElementById('xn_bar_menu_search').submit();return false">Search</a>
+</fieldset>
+</form>
+</div>
+<ul id="xn_bar_menu_tabs">
+<li><a href="https://www.datasciencecentral.com/main/authorization/signUp?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines">Sign Up</a></li>
+<li><a href="https://www.datasciencecentral.com/main/authorization/signIn?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines">Sign In</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="xg_theme" data-layout-pack="brutus">
+<div id="xg_themebody">
+<div id="xg_ad_above_header" class="xg_ad xj_ad_above_header dy-displaynone">
+</div>
+<div id="xg_head">
+<div id="xg_masthead">
+<h1 id="xg_sitename" class="xj_site_name"><a id="application_name_header_link" href="/"><img src="https://storage.ning.com/topology/rest/1.0/file/get/7215525257?profile=original" alt="Data Science Central"></a></h1>
+<p id="xg_sitedesc" class="xj_site_desc"></p>
+</div>
+<div id="xg_navigation" class="xj_navigation"><ul>
+<li id="xg_tab_xn54" class="xg_subtab"><a href="/"><span>Home</span></a></li><li dojoType="SubTabHover" id="xg_tab_xn25" class="xg_subtab"><a href="/profiles/blogs/check-out-our-dsc-newsletter"><span>Members &darr;</span></a><div class="xg_subtab" style="display:none;position:absolute;"><ul class="xg_subtab" style="display:block;"><li style="list-style:none !important;display:block;text-align:left;"><a href="/page/most-popular-content-on-dsc" style="float:none;"><span>Top Content</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/group/resources/forum/topics/selection-of-best-articles-from-our-past-weekly-digests" style="float:none;"><span>Archives</span></a></li></ul></div></li><li dojoType="SubTabHover" id="xg_tab_xn63" class="xg_subtab"><a href="/page/topics"><span>Tech Topics &darr;</span></a><div class="xg_subtab" style="display:none;position:absolute;"><ul class="xg_subtab" style="display:block;"><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_analytics" target="_blank" style="float:none;"><span>Analytics &amp; Data Science</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_ai" style="float:none;"><span>Artificial Intelligence</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_ml" style="float:none;"><span>Machine Learning</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_code" style="float:none;"><span>Code</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_devops" style="float:none;"><span>DevOps</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_data_security" style="float:none;"><span>Data Security</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_enterprise_data" style="float:none;"><span>Enterprise Data</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_graph" style="float:none;"><span>Graphs &amp; Modeling</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_nlp" style="float:none;"><span>NLP &amp; Chatbots</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_ux" style="float:none;"><span>User Experience</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_vr" target="_blank" style="float:none;"><span>Virtual Reality &amp; Gaming</span></a></li></ul></div></li><li dojoType="SubTabHover" id="xg_tab_xn81" class="xg_subtab"><a href="/page/topics"><span>Business Topics &darr;</span></a><div class="xg_subtab" style="display:none;position:absolute;"><ul class="xg_subtab" style="display:block;"><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_ai_marketing" style="float:none;"><span>AI Marketing</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_cxo" style="float:none;"><span>CxO Strategy</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_digifactoring" style="float:none;"><span>Process Automation</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_future_work" style="float:none;"><span>Digital Workplace</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_iot" style="float:none;"><span>Drones, Robots &amp; IoT</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_social_ai" style="float:none;"><span>Social Media AI</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_future_proof" style="float:none;"><span>Future Proof</span></a></li></ul></div></li><li dojoType="SubTabHover" id="xg_tab_xn94" class="xg_subtab"><a href="/page/topics"><span>By Sector &darr;</span></a><div class="xg_subtab" style="display:none;position:absolute;"><ul class="xg_subtab" style="display:block;"><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_food" style="float:none;"><span>Agriculture &amp; Food</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_educate" style="float:none;"><span>Education</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_energy" style="float:none;"><span>Energy</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_fintech" style="float:none;"><span>Finance &amp; Insurance</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_biotech" style="float:none;"><span>Health Care</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_gov" style="float:none;"><span>Government &amp; Legal</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_logistics" style="float:none;"><span>Logistics</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_entertainment" style="float:none;"><span>News &amp; Entertainment</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_science" style="float:none;"><span>Science</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_space" style="float:none;"><span>Space</span></a></li></ul></div></li><li dojoType="SubTabHover" id="xg_tab_xn60" class="xg_subtab"><a href="/page/media"><span>Media &darr;</span></a><div class="xg_subtab" style="display:none;position:absolute;"><ul class="xg_subtab" style="display:block;"><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?promoted=1" style="float:none;"><span>DSC Blogs</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/video/video/listTagged?tag=DSC+Podcast+Series" style="float:none;"><span>Podcasts</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/video/video/listFeatured" style="float:none;"><span>Webinars</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blog/list?tag=dsc_newsletter" style="float:none;"><span>Newsletters</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/events/event/listUpcoming" target="_blank" style="float:none;"><span>Industry Events</span></a></li></ul></div></li><li dojoType="SubTabHover" id="xg_tab_xn104" class="xg_subtab"><a href="/profiles/blog/list?tag=dsc_faq"><span>FAQs &darr;</span></a><div class="xg_subtab" style="display:none;position:absolute;"><ul class="xg_subtab" style="display:block;"><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blogs/so-you-want-to-write-for-dsc-1" target="_blank" style="float:none;"><span>Write For Us</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="/profiles/blogs/7-tips-for-posting-to-data-science-central" style="float:none;"><span>7 Tips for Writers</span></a></li></ul></div></li><li id="xg_tab_xn57" class="xg_subtab"><a href="https://www.education.datasciencecentral.com/?utm_source=DSC&amp;utm_medium=tab"><span>Education Spotlight</span></a></li><li dojoType="SubTabHover" id="xg_tab_xn90" class="xg_subtab"><a href="/page/sponsored-communities"><span>Sponsored Communities</span></a><div class="xg_subtab" style="display:none;position:absolute;"><ul class="xg_subtab" style="display:block;"><li style="list-style:none !important;display:block;text-align:left;"><a href="https://www.datavizualization.datasciencecentral.com/" style="float:none;"><span>Data Visualization</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="https://www.analyticbridge.datasciencecentral.com/" style="float:none;"><span>Analytic Bridge</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="https://hadoop360.datasciencecentral.com" style="float:none;"><span>Hadoop 360</span></a></li><li style="list-style:none !important;display:block;text-align:left;"><a href="https://www.bigdatanews.datasciencecentral.com/" style="float:none;"><span>Big Data News</span></a></li></ul></div></li><li id="xg_tab_xn35" class="xg_subtab"><a href="/page/search"><span>Search</span></a></li><li id="xg_tab_xn18" class="xg_subtab"><a href="/page/contact-us"><span>Contact</span></a></li></ul>
+</div>
+</div>
+<div id="xg_ad_below_header" class="xg_ad xj_ad_below_header">
+<div class="xg_module module-plain  html_module module_text xg_reset" data-module_name="text">
+<div class="xg_module_body xg_user_generated">
+
+<script src="https://cdn.ttgtmedia.com/cmp/sourcepoint/gdprTCFv2-config.min.js?v=7.82" type="text/javascript">
+</script>
+<script src="https://cdn.ttgtmedia.com/cmp/ttCmpApi.min.js" type="text/javascript">
+</script>
+<script src="https://cdn.ttgtmedia.com/cmp/sourcepoint/ccpa-config.min.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+var cmpApi;
+cmpApi = new ttCmpApi();
+</script>
+<div id="cmp-banner"></div>
+
+<center><script src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" type="text/javascript">
+</script> <script type="text/javascript">
+  window.googletag = window.googletag || {cmd: []};
+  googletag.cmd.push(function() {   
+googletag.defineSlot('/2672641/Bottom_Leaderboard', [728, 90], 'div-gpt-ad-1512428902846-0').addService(googletag.pubads());
+    googletag.defineSlot('/2672641/Box_Ad_Blog', [300, 250], 'div-gpt-ad-1512428902846-2').addService(googletag.pubads());
+    googletag.defineSlot('/2672641/Box_Ad_Forum', [300, 250], 'div-gpt-ad-1512428902846-3').addService(googletag.pubads());
+    googletag.defineSlot('/2672641/Skyscraper', [160, 600], 'div-gpt-ad-1512428902846-6').addService(googletag.pubads());
+    googletag.defineSlot('/2672641/Square_Box', [220, 220], 'div-gpt-ad-1512428902846-7').addService(googletag.pubads());
+    googletag.defineSlot('/2672641/Top_Leaderboard', [728, 90], 'div-gpt-ad-1512428902846-8').addService(googletag.pubads());
+    googletag.enableServices();
+  });
+</script> 
+<div id="div-gpt-ad-1512428902846-8" style="height: 90px; width: 728px;"><script type="text/javascript">
+var googleIabPuropseList = [1];
+var googleAdsLegitimateInterestsPurposeIds=[2,7,9,10];
+var isGoogleEnabled = true;
+
+window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+    if ((typeof(tcData) !== 'undefined') && (tcData !== null)) {
+        if (listenerSuccess && (tcData.eventStatus === 'tcloaded' || tcData.eventStatus === 'cmpuishown')) {
+            var gdprApplies = tcData.gdprApplies;
+            if (gdprApplies && !((cmpApi.getConsentforVendorV2(googleIabPuropseList)) && (cmpApi.getLIConsentforVendorV2(googleAdsLegitimateInterestsPurposeIds)))) {
+                window.__tcfapi('removeEventListener', 2, function (success) {
+                    if (success) {
+                        window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+                            if (listenerSuccess && tcData.eventStatus === 'useractioncomplete') {
+                                window.__tcfapi('getTCData', 2, function (tcData, success) {
+                                    if (success) {
+                                        if (Object.keys(tcData.purpose.consents).length === 0 && tcData.purpose.consents.constructor === Object) {
+                                            isGoogleEnabled = false;
+                                        } else {
+                                            for (var purposeid in googleIabPuropseList) {
+                                                if (tcData.purpose.consents[googleIabPuropseList[purposeid]] === null || tcData.purpose.consents[googleIabPuropseList[purposeid]] === undefined || tcData.purpose.consents[googleIabPuropseList[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                            for (var purposeid in googleAdsLegitimateInterestsPurposeIds) {
+                                                if (tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === null || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === undefined || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                        }
+                                        if (isGoogleEnabled) {
+                                          console.log("Making the call after consent div - 1512428902846-8");
+                                          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-8'); });
+                                        }
+                                      }
+                                });
+                                window.__tcfapi('removeEventListener', 2, function (success) {
+                                    if (success) {
+                                    }
+                                }, tcData.listenerId);
+                            }
+                        });
+                    }
+                }, tcData.listenerId);
+
+} else {
+    window.__tcfapi('removeEventListener', 2, function (success) {
+        if (success) {
+          console.log("Making the call without asking for consent div - 1512428902846-8");
+          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-8'); });
+        }
+    }, tcData.listenerId);
+}
+}
+}
+});
+</script></div>
+</center>
+
+
+<script type="text/javascript">
+var googleAnalyticsPurposes = [1];
+var isGaEnabled = true;
+//set this window property for TCFv2 support
+window['gtag_enable_tcf_support'] = true
+window.dataLayer = window.dataLayer || [];
+dataLayer = window.dataLayer;
+
+window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+    if ((typeof(tcData) !== 'undefined') && (tcData !== null)) {
+        if (listenerSuccess && (tcData.eventStatus === 'tcloaded' || tcData.eventStatus === 'cmpuishown')) {
+            var gdprApplies = tcData.gdprApplies;
+            if (gdprApplies && !(cmpApi.getConsentforVendorV2(googleAnalyticsPurposes))) {
+                //remove the listener ourself to not get called more than once
+                window.__tcfapi('removeEventListener', 2, function (success) {
+                    if (success) {
+                        window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+                            if (listenerSuccess && tcData.eventStatus === 'useractioncomplete') {
+                                window.__tcfapi('getTCData', 2, function (tcData, success) {
+                                    if (success) {
+                                        if (Object.keys(tcData.purpose.consents).length === 0 && tcData.purpose.consents.constructor === Object) {
+                                            isGaEnabled = false;
+                                        } else {
+                                            for (var purposeid in googleAnalyticsPurposes) {
+                                                if (tcData.purpose.consents[googleAnalyticsPurposes[purposeid]] === null || tcData.purpose.consents[googleAnalyticsPurposes[purposeid]] === undefined || tcData.purpose.consents[googleAnalyticsPurposes[purposeid]] === false){
+                                                    isGaEnabled = false;
+                                                }
+                                            }
+                                        }
+
+                                        console.log("isGAEnabled = " + isGaEnabled);
+                                        if (isGaEnabled){
+                                            var eventAction = 'GaEnabled';
+                                            var eventCategory = 'GA';
+                                            var eventLabel = 'GaEnabled';
+                                            if (typeof window.dataLayer !== 'undefined') {
+                                                args=[eventCategory,eventAction,eventLabel];
+                                                dataLayer.push({eventCategory:args[0],eventAction:args[1], eventLabel:args[2]});
+                                                dataLayer.push({'event': 'GaEnabled'});
+                                            }
+                                        }
+
+                                    }
+                                });
+
+                                window.__tcfapi('removeEventListener', 2, function (success) {
+                                    if (success) {
+                                        //listener Removed
+                                        logger.log('removed: ' + tcData.listenerId);
+                                    }
+                                }, tcData.listenerId);
+
+                            }
+                        });
+                    }
+                }, tcData.listenerId);
+            } else {
+                window.__tcfapi('removeEventListener', 2, function (success) {
+                    console.log("CONTEXT HAS CONSENT OR GDPR IS NOT APPLICABLE");
+                    if (success) {
+                        var eventAction = 'GaEnabled';
+                        var eventCategory = 'GA';
+                        var eventLabel = 'GaEnabled';
+                        if (typeof window.dataLayer !== 'undefined') {
+                            args=[eventCategory,eventAction,eventLabel];
+                            dataLayer.push({eventCategory:args[0],eventAction:args[1], eventLabel:args[2]});
+                            dataLayer.push({'event': 'GaEnabled'});
+                        }
+                    }
+                }, tcData.listenerId);
+            }
+
+        }
+    }
+});
+</script>
+<div class="tokenInfo">.</div>
+<script type="text/javascript">
+window.addEventListener('load',()=>{
+//let tagDataJSON = document.querySelector('#taxonomyData').textContent;
+let options = {method:'GET',mode:'cors',cache:'no-cache'};
+window.fetch("https://storage.ning.com/topology/rest/1.0/file/get/8580209666?profile=original",options)
+.then(resp=>resp.json())
+.then(tagData=>{
+//let tagData = JSON.parse(tagDataJSON);
+const queryString = window.location.search;
+console.log(queryString);
+const urlParams = new URLSearchParams(queryString);
+let tokenInfo = document.querySelector('.tokenInfo');
+console.log(tokenInfo);
+let tag=urlParams.get('tag');
+var body;
+if (tag.startsWith('dsc_')){
+    if (tagData.hasOwnProperty(tag)){
+         let entry = tagData[tag]
+         let template = eval("(tag,title)=>`"+entry.body+"`")
+         let body = template(tag,entry.title);
+         tokenInfo.innerHTML =body;
+         let tb = document.querySelector('.tb');
+         tb.style.display = 'none';
+         console.log(tb.textContent);
+         }
+    else {
+         let entry = tagData['dsc_noop']
+         let template = eval("(tag,title)=>`"+entry.body+"`")
+         let title = `Topic '${tag.split('dsc_')[1]}' In Development`;
+         let body = template(tag,title);
+         tokenInfo.innerHTML =body;
+         let tb = document.querySelector('.tb');
+         tb.style.display = 'none';
+         console.log(tb.textContent);
+         }
+     }
+else {
+    // Normal tag employed here     
+    }
+})
+.catch(e=>console.log(e))
+/* let bdy = document.querySelectorAll('.xg_user_generated');
+let content = bdy[1].innerHTML;
+let newContent = content.replace(/\[gist.*?href=\"(.+?)\".*?\]/g,'<script src="$1"><\/script>')
+bdy[1].innerHTML=newContent;*/
+});
+</script><script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" type="text/javascript">
+</script>
+</div>
+</div>
+</div>
+<div id="xg" class="xg_widget_profiles xg_widget_profiles_blog xg_widget_profiles_blog_show">
+<div id="xg_body">
+<div class="xj_notifications"></div>
+<div class="xg_column xg_span-16" id="column1">
+<div id="xg_canvas" class="xj_canvas">
+<ul class="navigation easyclear"><li><a href="https://www.datasciencecentral.com/profiles/blog/list">All Blog Posts</a></li><li><a href="https://www.datasciencecentral.com/profiles/blog/list?my=1">My Blog</a></li><li class="right  xg_lightborder navbutton"><a href="https://www.datasciencecentral.com/profiles/blog/new" class="xg_sprite xg_sprite-add">Add</a></li></ul>
+<div class="xg_module xg_blog xg_blog_detail xg_blog_mypage xg_module_with_dialog">
+<div class="xg_headline xg_headline-img xg_headline-2l">
+<div class="ib"><span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/ajitjaokar" title="ajit jaokar"><span class="table_img dy-avatar dy-avatar-64 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2800341167?profile=RESIZE_64x64&amp;width=64&amp;height=64&amp;crop=1%3A1" alt="" /></span></a></span></div>
+<div class="tb"><h1>How to Choose a Machine Learning Model &ndash; Some Guidelines</h1>
+<ul class="navigation byline">
+<li><a class="nolink">Posted by </a><a href="/profile/ajitjaokar">ajit jaokar</a><a class="nolink"> on October 15, 2018 at 11:30am</a></li>
+<li><a class="xg_sprite xg_sprite-view" href="https://www.datasciencecentral.com/profiles/blog/list?user=32ac9fc41n4f4">View Blog</a></li>
+</ul>
+</div>
+</div>
+<div class="xg_module_body">
+<div class="postbody">
+<div class="xg_user_generated">
+<p><span><a href="https://storage.ning.com/topology/rest/1.0/file/get/2808372468?profile=original" target="_self"><img src="https://storage.ning.com/topology/rest/1.0/file/get/2808372468?profile=original" width="582" class="align-full" /></a></span></p>
+<p><span> </span></p>
+<p><span> </span></p>
+<p><span>In this post, we explore some broad guidelines for selecting machine learning models</span></p>
+<p><span> </span></p>
+<p><span>The overall steps for Machine Learning/Deep Learning are:</span></p>
+<ul>
+<li><span>Collect data</span></li>
+<li><span>Check for anomalies, missing data and clean the data</span></li>
+<li><span>Perform statistical analysis and initial visualization</span></li>
+<li><span>Build models</span></li>
+<li><span>Check the accuracy</span></li>
+<li><span>Present the results</span></li>
+</ul>
+<p><span> </span></p>
+<p><span>Machine learning tasks can be classified into</span></p>
+<ul>
+<li><span>Supervised learning</span></li>
+<li><span>Unsupervised learning</span></li>
+<li><span>Semi-supervised learning</span></li>
+<li><span>Reinforcement learning</span></li>
+</ul>
+<p><span> </span></p>
+<p><span>PS – in this document – we do not focus on the last two</span></p>
+<p><span> </span></p>
+<p><span>Below are some approaches on choosing a model for Machine Learning/Deep Learning</span></p>
+<p><span> </span></p>
+<p><strong><u><span>OVERALL APPROACHES</span></u></strong></p>
+<p><span> </span></p>
+<ul>
+<li><span>Dealing with <u>unbalanced data</u>: Use <a rel=nofollow href="https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets"><strong>resampling</strong></a> strategies            </span></li>
+</ul>
+<p></p>
+<ul>
+<li>Create <u>new features</u> <span>: <strong>Principal component analysis</strong> (PCA) to reduce dimensionality, <strong>Autoencoders</strong> to create a latent space and possibly <a rel=nofollow href="https://towardsdatascience.com/how-to-create-new-features-using-clustering-4ae772387290"><strong>Clustering to create new features</strong></a></span></li>
+</ul>
+<p></p>
+<ul>
+<li><span>To prevent <u>overfitting, outliers and noise</u> in linear regression - use <strong>regularization techniques</strong> like lasso and ridge.</span></li>
+</ul>
+<p></p>
+<ul>
+<li><span>Overcoming the <u>Black-box AI problem</u> - consider strategies for <a rel=nofollow href="https://christophm.github.io/interpretable-ml-book/simple.html"><strong>building interpretable models</strong></a></span></li>
+</ul>
+<p></p>
+<ul>
+<li>Algorithms not sensitive to <u>outliers :</u> Some discussion on choice of <span><a rel=nofollow href="https://stats.stackexchange.com/questions/187200/how-are-random-forests-not-sensitive-to-outliers"><strong>Random Forest to overcome outliers</strong></a></span></li>
+</ul>
+<p><span> </span></p>
+<p><strong><u><span>MACHINE LEARNING MODELS</span></u></strong></p>
+<ul>
+<li><span>First approach <u>to predicting continuous values:</u> <strong>Linear Regression</strong> is generally a good first approach for predicting continuous values (ex: prices)</span></li>
+</ul>
+<p></p>
+<ul>
+<li><u>Binary classification</u>: <strong><span>Logistic regression</span></strong> <span>is a good starting point for Binary classification. <strong>Support Vector Machines</strong> SVM is also a good choice of two class classification</span></li>
+</ul>
+<p></p>
+<ul>
+<li><u>Multi-class classification</u>: <strong><span>Random forest</span></strong> <span>is a choice for multi-class classification. See <a rel=nofollow href="https://datascience.stackexchange.com/questions/6838/when-to-use-random-forest-over-svm-and-vice-versa">SVM vs Random Forest usage</a></span></li>
+</ul>
+<p></p>
+<ul>
+<li>Is there a <u>simplest or easiest model category</u> to start off with? <strong><span>Decision trees</span></strong> <span>are often seen as simple to understand and use. Decision trees are implemented through models such as <strong>Random forest or Gradient boosting.</strong></span></li>
+</ul>
+<p></p>
+<ul>
+<li><u><span>Which models are used in <strong>Kaggle?</strong></span></u> <span>For supervised learning: <strong>Random forest and XGboost See note on</strong> <strong>Gradient boosted trees</strong></span></li>
+</ul>
+<p><strong><u><span> </span></u></strong></p>
+<p><strong><u><span>DEEP LEARNING MODELS</span></u></strong></p>
+<ul>
+<li><u><span>Complex features</span></u> <span>which cannot be easily specified but you have large number of labelled examples: <strong>Multi-layer perceptrons</strong></span></li>
+</ul>
+<p></p>
+<ul>
+<li><u>Vision based Machine Learning</u>: Image classification, Object Detection, Image segmentation – <strong>Convolutional Neural Networks</strong></li>
+</ul>
+<p></p>
+<ul>
+<li><u>Sequence modelling tasks</u>: <strong>RNNs (typically LSTM)</strong> for sequence modelling tasks ex text classification or language translation</li>
+</ul>
+<p><span> </span></p>
+<p><span>Comments welcome</span></p>
+<p><strong><span> </span></strong></p>
+<p>Image source: BMJ – <span><a rel=nofollow href="https://blogs.bmj.com/technology/2017/05/04/what-makes-machine-learning-in-healthcare-so-powerful/">what makes machine learning in healthcare so powerful</a></span></p>
+<p><span> </span></p> </div>
+</div>
+<div class="left-panel">
+<script>xg.addOnRequire(function () { xg.post('/main/viewcount/update?xn_out=json', {key: '6448529:BlogPost:768280', x: '15e621a'}); });</script> <p class="small dy-clear view-count-container">
+<span class="view-count-label">Views:</span> <span class="view-count">28743</span></p>
+<p class="small object-detail" id="tagsList" style="display:none">Tags:<br /></p>
+<div class="likebox likebox-ning">
+<div class="ning-like">
+<div class="xg_lightborder like-button like-button-1">
+<a data-content-id="6448529:BlogPost:768280" data-content-type="BlogPost" data-sign-up-url="https://www.datasciencecentral.com/main/authorization/signUp?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines" data-like-url="/main/like/like" data-unlike-url="/main/like/unlike" data-track='{"category":"Likes","action":"Like","label":""}' data-page-type="detail" class="xg_sprite" href="#">
+Like </a>
+</div>
+<div class="like-count">
+<a href="#" class="view-liked" _id="6448529:BlogPost:768280">7 members like this</a>
+</div>
+</div>
+</div>
+<p class="share-links clear"><a class="xg_sprite xg_sprite-share" href="https://www.datasciencecentral.com/main/sharing/share?id=6448529%253ABlogPost%253A768280">Share</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+<span class="xg_tweet">
+<a href="https://twitter.com/share" class="post_to_twitter twitter-share-button" target="_blank" data-text="Checking out &quot;How to Choose a Machine Learning Model &ndash; Some Guidelines&quot; on Data Science Central:" data-url="https://www.datasciencecentral.com/profiles/blogs/how-to-choose-a-machine-learning-model-some-guidelines" data-count="none" data-dnt="true">Tweet</a>
+</span>
+<a class="post_to_facebook xj_post_to_facebook_stream dy-displaynone" href="https://www.facebook.com/share.php?u=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines%3Fxg_source%3Dfacebook&amp;t=How%20to%20Choose%20a%20Machine%20Learning%20Model%20%E2%80%93%20Some%20Guidelines%20on%20Data%20Science%20Central" _args="{&quot;name&quot;:&quot;How to Choose a Machine Learning Model \u2013 Some Guidelines on Data Science Central&quot;,&quot;href&quot;:&quot;https:\/\/www.datasciencecentral.com\/profiles\/blogs\/how-to-choose-a-machine-learning-model-some-guidelines?xg_source=facebook&quot;,&quot;media&quot;:[{&quot;type&quot;:&quot;image&quot;,&quot;src&quot;:&quot;http:\/\/storage.ning.com\/topology\/rest\/1.0\/file\/get\/2808372468?profile=original&quot;,&quot;href&quot;:&quot;https:\/\/www.datasciencecentral.com\/profiles\/blogs\/how-to-choose-a-machine-learning-model-some-guidelines?xg_source=facebook&quot;}],&quot;actionLink&quot;:{&quot;text&quot;:&quot;Full Post&quot;,&quot;href&quot;:&quot;https:\/\/www.datasciencecentral.com\/profiles\/blogs\/how-to-choose-a-machine-learning-model-some-guidelines?xg_source=facebook&quot;},&quot;description&quot;:&quot;\n\u00a0\n\u00a0\nIn this post, we explore some broad guidelines for selecting machine learning models\n\u00a0\nThe overall steps for Machine Learning\/Deep Learning are:\n\nCollect data\nCheck for anomalies, missing data and clean the data\nPerform statistical analysis and initial visualization\nBuild models\nCheck the accuracy\nPresent the results\n\n\u00a0\nMachine learning tasks can be classified into\n\nSupervised learning\nUnsupervised learning\nSemi-supervised learning\nReinforcement learning\n\n\u00a0\nPS \u2013 in this document \u2013 we do not focus on the last two\n\u00a0\nBelow are some approaches on choosing a model for Machine Learning\/Deep Learning\n\u00a0\nOVERALL APPROACHES\n\u00a0\n\nDealing with unbalanced data: Use resampling strategies\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\n\n\n\nCreate new features : Principal component analysis (PCA) to reduce dimensionality, Autoencoders to create a latent space and possibly Clustering to create new features\n\n\n\nTo prevent overfitting, outliers and noise in linear regression - use regularization techniques like lasso and ridge.\n\n\n\nOvercoming the Black-box AI problem - consider strategies for building interpretable models\n\n\n\nAlgorithms not sensitive to outliers : Some discussion on choice of Random Forest to overcome outliers\n\n\u00a0\nMACHINE LEARNING MODELS\n\nFirst approach to predicting continuous values: Linear Regression is generally a good first approach for predicting continuous values (ex: prices)\n\n\n\nBinary classification: Logistic regression is a good starting point for Binary classification. Support Vector Machines SVM is also a good choice of two class classification\n\n\n\nMulti-class classification: Random forest is a choice for multi-class classification. See SVM vs Random Forest usage\n\n\n\nIs there a simplest or easiest model category to start off with? Decision trees are often seen as simple to understand and use. Decision trees are implemented through models such as Random forest or Gradient boosting.\n\n\n\nWhich models are used in Kaggle? For supervised learning: Random forest and XGboost See note on Gradient boosted t&quot;,&quot;log&quot;:{&quot;module&quot;:&quot;profiles&quot;,&quot;page&quot;:&quot;blog&quot;,&quot;action&quot;:&quot;show&quot;},&quot;private&quot;:false,&quot;user&quot;:null,&quot;contentId&quot;:null,&quot;display&quot;:false,&quot;userMessage&quot;:&quot;&quot;,&quot;pageId&quot;:null,&quot;text&quot;:&quot;Facebook&quot;}">Facebook</a>
+<div class="likebox">
+<div class="facebook-like" data-content-type="BlogPost" data-content-id="6448529:BlogPost:768280" data-page-type="detail">
+<fb:like href="https://www.datasciencecentral.com/xn/detail/6448529:BlogPost:768280" layout="button_count" show_faces="false" width="450"></fb:like>
+</div>
+</div>
+</p> </div>
+<ul class="pagination smallpagination">
+<li class="left"><a href="https://www.datasciencecentral.com/profiles/blogs/ai-and-algorithmorcacy-what-the-future-will-look-like" title="AI and Algorithmocracy: What the Future Will Look Like">&lt; Previous Post</a></li> <li class="right"><a title="AI technologies used in Robotics" href="https://www.datasciencecentral.com/profiles/blogs/ai-technologies-used-in-robotics">Next Post &gt;</a></li>
+</ul>
+</div>
+</div>
+<div class="xg_module">
+<div class="xg_module_body">
+<p id="add-comment">Comment</p>
+<div class="comment-join">
+<h3>You need to be a member of Data Science Central to add comments!</h3>
+<p><a href="https://www.datasciencecentral.com/main/authorization/signUp?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines">Join Data Science Central</a></p>
+</div>
+</div>
+<div class="xg_module_body" id="comments" _numComments="7" _scrollTo="">
+<dl _id="6448529:Comment:770218" id="c_f0c" class="comment vcard xg_lightborder">
+<dt>
+<a name="first_comment"></a><a name="comment-6448529_Comment_770218" id="comment-6448529_Comment_770218"></a>
+<span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/seik" title="sei k"><span class="table_img dy-avatar dy-avatar-48 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2801233848?profile=RESIZE_48X48&amp;width=48&amp;height=48&amp;crop=1%3A1" alt="" /></span></a></span> Comment by <a href="/profile/seik" class="fn url">sei k</a> on October 21, 2018 at 2:23pm </dt>
+<dd>
+<div class="xg_user_generated"><p>Very informative article, thank you!</p></div> </dd>
+</dl>
+<dl _id="6448529:Comment:769826" id="c_b0c" class="comment vcard xg_lightborder">
+<dt>
+<a name="comment-6448529_Comment_769826" id="comment-6448529_Comment_769826"></a>
+<span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/ajitjaokar" title="ajit jaokar"><span class="table_img dy-avatar dy-avatar-48 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2800341167?profile=RESIZE_48X48&amp;width=48&amp;height=48&amp;crop=1%3A1" alt="" /></span></a></span> Comment by <a href="/profile/ajitjaokar" class="fn url">ajit jaokar</a> on October 19, 2018 at 11:20am </dt>
+<dd>
+<div class="xg_user_generated"><p>thanks @Nelson</p>
+<p></p></div> </dd>
+</dl>
+<dl _id="6448529:Comment:769471" id="c_acf" class="comment vcard xg_lightborder">
+<dt>
+<a name="comment-6448529_Comment_769471" id="comment-6448529_Comment_769471"></a>
+<span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/NelsonKemboiYego" title="Nelson Kemboi Yego"><span class="table_img dy-avatar dy-avatar-48 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2808682810?profile=original&amp;width=48&amp;height=48&amp;crop=1%3A1" alt="" /></span></a></span> Comment by <a href="/profile/NelsonKemboiYego" class="fn url">Nelson Kemboi Yego</a> on October 18, 2018 at 9:27pm </dt>
+<dd>
+<div class="xg_user_generated"><p>Simple and clear</p></div> </dd>
+</dl>
+<dl _id="6448529:Comment:769378" id="c_765" class="comment vcard xg_lightborder">
+<dt>
+<a name="comment-6448529_Comment_769378" id="comment-6448529_Comment_769378"></a>
+<span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/ajitjaokar" title="ajit jaokar"><span class="table_img dy-avatar dy-avatar-48 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2800341167?profile=RESIZE_48X48&amp;width=48&amp;height=48&amp;crop=1%3A1" alt="" /></span></a></span> Comment by <a href="/profile/ajitjaokar" class="fn url">ajit jaokar</a> on October 18, 2018 at 8:24pm </dt>
+<dd>
+<div class="xg_user_generated"><p>@Ramiro @Indu thanks</p>
+<p>@Mark - thanks yes .. am planning to :) but got tied up with teaching(@Oxford) which starts soon <a rel=nofollow href="https://www.conted.ox.ac.uk/courses/data-science-for-the-internet-of-things-iot" target="_blank">https://www.conted.ox.ac.uk/courses/data-science-for-the-internet-o...</a> - so its on the cards </p></div> </dd>
+</dl>
+<dl _id="6448529:Comment:769456" id="c_812" class="comment vcard xg_lightborder">
+<dt>
+<a name="comment-6448529_Comment_769456" id="comment-6448529_Comment_769456"></a>
+<span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/MarkGrech" title="Mark"><span class="table_img dy-avatar dy-avatar-48 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2808682810?profile=original&amp;width=48&amp;height=48&amp;crop=1%3A1" alt="" /></span></a></span> Comment by <a href="/profile/MarkGrech" class="fn url">Mark</a> on October 18, 2018 at 11:29am </dt>
+<dd>
+<div class="xg_user_generated"><p>Great post.how about adding two other sectiond one for outlier detectoon and feature selection (not extraction)</p></div> </dd>
+</dl>
+<dl _id="6448529:Comment:769161" id="c_ac8" class="comment vcard xg_lightborder">
+<dt>
+<a name="comment-6448529_Comment_769161" id="comment-6448529_Comment_769161"></a>
+<span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/RamiroArce" title="Ramiro Arce"><span class="table_img dy-avatar dy-avatar-48 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2802406836?profile=RESIZE_48X48&amp;width=48&amp;height=48&amp;crop=1%3A1" alt="" /></span></a></span> Comment by <a href="/profile/RamiroArce" class="fn url">Ramiro Arce</a> on October 18, 2018 at 9:53am </dt>
+<dd>
+<div class="xg_user_generated"><p>Nice overview for beginners, like me :D</p>
+<p>Thanks.</p></div> </dd>
+</dl>
+<dl _id="6448529:Comment:769447" id="c_0ba" class="comment vcard xg_lightborder last-child">
+<dt>
+<a name="last_comment"></a><a name="comment-6448529_Comment_769447" id="comment-6448529_Comment_769447"></a>
+<span class="xg_avatar"><a class="fn url" href="https://www.datasciencecentral.com/profile/InduShahi" title="Indu Shahi"><span class="table_img dy-avatar dy-avatar-48 "><img class="photo photo" src="https://storage.ning.com/topology/rest/1.0/file/get/2808682810?profile=original&amp;width=48&amp;height=48&amp;crop=1%3A1" alt="" /></span></a></span> Comment by <a href="/profile/InduShahi" class="fn url">Indu Shahi</a> on October 18, 2018 at 9:39am </dt>
+<dd>
+<div class="xg_user_generated"><p>Tips for ML and data science folks</p></div> </dd>
+</dl>
+</div>
+<div class="xg_module_foot" id="xj_comments_footer">
+<p class="left">
+<a class="xg_icon xg_icon-rss" href="https://www.datasciencecentral.com/profiles/comment/feed?attachedTo=6448529%3ABlogPost%3A768280&amp;xn_auth=no">RSS</a>
+</p>
+</div>
+</div>
+<input type="hidden" id="incrementViewCountEndpoint" value="https://www.datasciencecentral.com/profiles/blog/incrementViewCount?id=6448529%3ABlogPost%3A768280&amp;xn_out=json" />
+</div>
+</div>
+<div class="xg_column xg_span-5 xg_last" id="column2">
+<div class="xj_user_info"> <div class="xg_module" id="xg_module_account">
+<div class="xg_module_body xg_signup xg_lightborder">
+<p>Welcome to<br />Data Science Central</p>
+<p class="last-child"><big><strong><a href="https://www.datasciencecentral.com/main/authorization/signUp?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines">Sign Up</a></strong></big><br />or <a href="https://www.datasciencecentral.com/main/authorization/signIn?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines" style="white-space:nowrap">Sign In</a></p>
+</div>
+</div>
+</div>
+<div class="xj_sidebar_content"><div class="xg_module html_module module_text xg_reset" data-module_name="text">
+<div class="xg_module_body xg_user_generated">
+<h2><a href="https://www.benzinga.com/money/best-data-science-blogs-ranked/" target="_blank" rel="noopener"><img src="https://storage.ning.com/topology/rest/1.0/file/get/8943276496?profile=RESIZE_710x" width="180" class="align-full" /></a></h2>
+<h2>Related TechTarget Content</h2>
+<ul>
+<li><a href="https://searchenterpriseai.techtarget.com/tip/11-data-science-skills-for-machine-learning-and-AI#RonaldSchmelzer44326">11 data science skills for machine learning and AI</a></li>
+<li><a href="https://searchcloudcomputing.techtarget.com/tip/Get-started-on-AWS-with-this-developer-tutorial-for-beginners#ChrisTozzi44326">Get started on AWS with this developer tutorial for beginners</a></li>
+<li><a href="https://searchunifiedcommunications.techtarget.com/news/252500429/Microsoft-Zoom-gain-UCaaS-market-share#MaximTamarov44326">Microsoft, Zoom gain UCaaS market share as Cisco loses</a></li>
+<li><a href="https://searchnetworking.techtarget.com/post/Develop-5G-ecosystems-for-connectivity-in-the-remote-work-era#NiteshBansal44326">Develop 5G ecosystems for connectivity in the remote work era</a></li>
+<li><a href="https://searchunifiedcommunications.techtarget.com/tip/Microsoft-Teams-vs-Zoom-Compare-video-conference-platforms#AndrewFroehlich44326">Choose between Microsoft Teams vs. Zoom for conference needs</a></li>
+<li><a href="https://searchnetworking.techtarget.com/tip/How-to-prepare-networks-for-the-return-to-office#JohnFruehe44326">How to prepare networks for the return to office</a></li>
+<li><a href="https://searchbusinessanalytics.techtarget.com/feature/252500420/Qlik-keeps-focus-on-real-time-actionable-analytics#EricAvidon44326">Qlik keeps focus on real-time, actionable analytics</a></li>
+<li><a href="https://searchbusinessanalytics.techtarget.com/feature/The-data-scientist-job-outlook-positive-post-pandemic#JosephMCarew44326">Data scientist job outlook in post-pandemic world</a></li>
+<li><a href="https://searchdatamanagement.techtarget.com/tip/10-big-data-challenges-and-how-to-address-them#GeorgeLawton44326">10 big data challenges and how to address them</a></li>
+<li><a href="https://searchbusinessanalytics.techtarget.com/tip/6-essential-big-data-best-practices-for-businesses#DonaldFarmer44326">6 essential big data best practices for businesses</a></li>
+<li><a href="https://searchdatamanagement.techtarget.com/feature/Hadoop-vs-Spark-Comparing-the-two-big-data-frameworks#GeorgeLawton44326">Hadoop vs. Spark: Comparing the two big data frameworks</a></li>
+<li><a href="https://searchcio.techtarget.com/feature/With-accelerated-digital-transformation-less-is-more#JohnMoore44326">With accelerated digital transformation, less is more</a></li>
+<li><a href="https://internetofthingsagenda.techtarget.com/feature/4-IoT-connectivity-challenges-and-strategies-to-tackle-them#MaryEShacklett44326">4 IoT connectivity challenges and strategies to tackle them</a></li>
+</ul>
+<p>Posted 10 May 2021</p>
+</div>
+</div>
+<div class="xg_module html_module module_text xg_reset" data-module_name="text">
+<div class="xg_module_body xg_user_generated">
+<center>
+<div id='div-gpt-ad-1512428902846-6' style='height:600px; width:160px;'><script type="text/javascript">
+var googleIabPuropseList = [1];
+var googleAdsLegitimateInterestsPurposeIds=[2,7,9,10];
+var isGoogleEnabled = true;
+
+window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+    if ((typeof(tcData) !== 'undefined') && (tcData !== null)) {
+        if (listenerSuccess && (tcData.eventStatus === 'tcloaded' || tcData.eventStatus === 'cmpuishown')) {
+            var gdprApplies = tcData.gdprApplies;
+            if (gdprApplies && !((cmpApi.getConsentforVendorV2(googleIabPuropseList)) && (cmpApi.getLIConsentforVendorV2(googleAdsLegitimateInterestsPurposeIds)))) {
+                window.__tcfapi('removeEventListener', 2, function (success) {
+                    if (success) {
+                        window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+                            if (listenerSuccess && tcData.eventStatus === 'useractioncomplete') {
+                                window.__tcfapi('getTCData', 2, function (tcData, success) {
+                                    if (success) {
+                                        if (Object.keys(tcData.purpose.consents).length === 0 && tcData.purpose.consents.constructor === Object) {
+                                            isGoogleEnabled = false;
+                                        } else {
+                                            for (var purposeid in googleIabPuropseList) {
+                                                if (tcData.purpose.consents[googleIabPuropseList[purposeid]] === null || tcData.purpose.consents[googleIabPuropseList[purposeid]] === undefined || tcData.purpose.consents[googleIabPuropseList[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                            for (var purposeid in googleAdsLegitimateInterestsPurposeIds) {
+                                                if (tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === null || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === undefined || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                        }
+                                        if (isGoogleEnabled) {
+                                          console.log("Making the call after consent div - 1512428902846-6");
+                                          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-6'); });
+                                        }
+                                      }
+                                });
+                                window.__tcfapi('removeEventListener', 2, function (success) {
+                                    if (success) {
+                                    }
+                                }, tcData.listenerId);
+                            }
+                        });
+                    }
+                }, tcData.listenerId);
+
+} else {
+    window.__tcfapi('removeEventListener', 2, function (success) {
+        if (success) {
+          console.log("Making the call without asking for consent div - 1512428902846-6");
+          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-6'); });
+        }
+    }, tcData.listenerId);
+}
+}
+}
+});
+</script></div>
+</center>
+</div>
+</div>
+<div class="xg_module html_module module_text xg_reset" data-module_name="text">
+<div class="xg_module_body xg_user_generated">
+<center>
+<div id='div-gpt-ad-1512428902846-7' style='height:220px; width:220px;'><script type="text/javascript">
+var googleIabPuropseList = [1];
+var googleAdsLegitimateInterestsPurposeIds=[2,7,9,10];
+var isGoogleEnabled = true;
+
+window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+    if ((typeof(tcData) !== 'undefined') && (tcData !== null)) {
+        if (listenerSuccess && (tcData.eventStatus === 'tcloaded' || tcData.eventStatus === 'cmpuishown')) {
+            var gdprApplies = tcData.gdprApplies;
+            if (gdprApplies && !((cmpApi.getConsentforVendorV2(googleIabPuropseList)) && (cmpApi.getLIConsentforVendorV2(googleAdsLegitimateInterestsPurposeIds)))) {
+                window.__tcfapi('removeEventListener', 2, function (success) {
+                    if (success) {
+                        window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+                            if (listenerSuccess && tcData.eventStatus === 'useractioncomplete') {
+                                window.__tcfapi('getTCData', 2, function (tcData, success) {
+                                    if (success) {
+                                        if (Object.keys(tcData.purpose.consents).length === 0 && tcData.purpose.consents.constructor === Object) {
+                                            isGoogleEnabled = false;
+                                        } else {
+                                            for (var purposeid in googleIabPuropseList) {
+                                                if (tcData.purpose.consents[googleIabPuropseList[purposeid]] === null || tcData.purpose.consents[googleIabPuropseList[purposeid]] === undefined || tcData.purpose.consents[googleIabPuropseList[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                            for (var purposeid in googleAdsLegitimateInterestsPurposeIds) {
+                                                if (tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === null || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === undefined || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                        }
+                                        if (isGoogleEnabled) {
+                                          console.log("Making the call after consent div - 1512428902846-7");
+                                          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-7'); });
+                                        }
+                                      }
+                                });
+                                window.__tcfapi('removeEventListener', 2, function (success) {
+                                    if (success) {
+                                    }
+                                }, tcData.listenerId);
+                            }
+                        });
+                    }
+                }, tcData.listenerId);
+
+} else {
+    window.__tcfapi('removeEventListener', 2, function (success) {
+        if (success) {
+          console.log("Making the call without asking for consent div - 1512428902846-7");
+          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-7'); });
+        }
+    }, tcData.listenerId);
+}
+}
+}
+});
+</script></div>
+</center>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="xg_foot">
+<div id="xg_footcontent">
+<div class="xj_foot_content"><p class="left">
+© 2021 &nbsp; TechTarget, Inc. &nbsp;
+Powered by<a class="poweredBy-logo" href="https://www.ning.com/" title="" alt="" rel="dofollow">
+<img class="poweredbylogo" width="87" height="15" src="https://static.ning.com/socialnetworkmain/widgets/index/gfx/Ning_MM_footer_blk@2x.png?xn_version=3605040243" title="Ning Website Builder" alt="Website builder | Create website | Ning.com">
+</a> </p>
+<p class="right xg_lightfont">
+<a href="https://www.datasciencecentral.com/main/embeddable/list">Badges</a> &nbsp;|&nbsp;
+<a href="https://www.datasciencecentral.com/main/authorization/signUp?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fmain%2Findex%2Freport" dojoType="PromptToJoinLink" _joinPromptText="Please sign up or sign in to complete this step." _hasSignUp="true" _signInUrl="https://www.datasciencecentral.com/main/authorization/signIn?target=https%3A%2F%2Fwww.datasciencecentral.com%2Fmain%2Findex%2Freport">Report an Issue</a> &nbsp;|&nbsp;
+<a href="https://www.datasciencecentral.com/main/authorization/privacyPolicy?previousUrl=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines">Privacy Policy</a> &nbsp;|&nbsp;
+<a href="https://www.datasciencecentral.com/main/authorization/termsOfService?previousUrl=https%3A%2F%2Fwww.datasciencecentral.com%2Fprofiles%2Fblogs%2Fhow-to-choose-a-machine-learning-model-some-guidelines">Terms of Service</a>
+</p>
+</div>
+</div>
+</div>
+<div id="xg_ad_below_footer" class="xg_ad xj_ad_below_footer">
+<div class="xg_module module-plain  html_module module_text xg_reset" data-module_name="text">
+<div class="xg_module_body xg_user_generated">
+<style type="text/css">
+/**/
+/**/
+/**/
+.codeblock {border:inset 2px grey;}
+/**/
+/**/
+/**/
+</style>
+<center>
+<div id='div-gpt-ad-1512428902846-0' style='height:90px; width:728px;'><script type="text/javascript">
+var googleIabPuropseList = [1];
+var googleAdsLegitimateInterestsPurposeIds=[2,7,9,10];
+var isGoogleEnabled = true;
+
+window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+    if ((typeof(tcData) !== 'undefined') && (tcData !== null)) {
+        if (listenerSuccess && (tcData.eventStatus === 'tcloaded' || tcData.eventStatus === 'cmpuishown')) {
+            var gdprApplies = tcData.gdprApplies;
+            if (gdprApplies && !((cmpApi.getConsentforVendorV2(googleIabPuropseList)) && (cmpApi.getLIConsentforVendorV2(googleAdsLegitimateInterestsPurposeIds)))) {
+                window.__tcfapi('removeEventListener', 2, function (success) {
+                    if (success) {
+                        window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+                            if (listenerSuccess && tcData.eventStatus === 'useractioncomplete') {
+                                window.__tcfapi('getTCData', 2, function (tcData, success) {
+                                    if (success) {
+                                        if (Object.keys(tcData.purpose.consents).length === 0 && tcData.purpose.consents.constructor === Object) {
+                                            isGoogleEnabled = false;
+                                        } else {
+                                            for (var purposeid in googleIabPuropseList) {
+                                                if (tcData.purpose.consents[googleIabPuropseList[purposeid]] === null || tcData.purpose.consents[googleIabPuropseList[purposeid]] === undefined || tcData.purpose.consents[googleIabPuropseList[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                            for (var purposeid in googleAdsLegitimateInterestsPurposeIds) {
+                                                if (tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === null || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === undefined || tcData.purpose.legitimateInterests[googleAdsLegitimateInterestsPurposeIds[purposeid]] === false) {
+                                                    isGoogleEnabled = false;
+                                                }
+                                            }
+                                        }
+                                        if (isGoogleEnabled) {
+                                          console.log("Making the call after consent div - 1512428902846-0");
+                                          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-0'); });
+                                        }
+                                      }
+                                });
+                                window.__tcfapi('removeEventListener', 2, function (success) {
+                                    if (success) {
+                                    }
+                                }, tcData.listenerId);
+                            }
+                        });
+                    }
+                }, tcData.listenerId);
+
+} else {
+    window.__tcfapi('removeEventListener', 2, function (success) {
+        if (success) {
+          console.log("Making the call without asking for consent div - 1512428902846-0");
+          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1512428902846-0'); });
+        }
+    }, tcData.listenerId);
+}
+}
+}
+});
+</script></div>
+<br /></center>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="xj_after_content"><div id="xj_baz17246" class="xg_theme"></div>
+<div id="xg_overlay" style="display:none;">
+<!--[if lte IE 6.5]><iframe></iframe><![endif]-->
+</div>
+<!--googleoff: all--><noscript>
+	<style type="text/css" media="screen">
+        #xg { position:relative;top:120px; }
+        #xn_bar { top:120px; }
+	</style>
+	<div class="errordesc noscript">
+		<div>
+            <h3><strong>Hello, you need to enable JavaScript to use Data Science Central.</strong></h3>
+            <p>Please check your browser settings or contact your system administrator.</p>
+			<img src="/xn_resources/widgets/index/gfx/jstrk_off.gif" alt="" height="1" width="1" />
+		</div>
+	</div>
+</noscript><!--googleon: all-->
+<script type="text/javascript" src="https://static.ning.com/socialnetworkmain/widgets/lib/core.min.js?xn_version=1651386455"></script> <script>
+            var sources = ["https:\/\/static.ning.com\/socialnetworkmain\/widgets\/lib\/js\/jquery\/jquery.ui.widget.js?xn_version=202103031431","https:\/\/static.ning.com\/socialnetworkmain\/widgets\/lib\/js\/jquery\/jquery.iframe-transport.js?xn_version=202103031431","https:\/\/static.ning.com\/socialnetworkmain\/widgets\/lib\/js\/jquery\/jquery.fileupload.js?xn_version=202103031431","https:\/\/storage.ning.com\/topology\/rest\/1.0\/file\/get\/8532181288?profile=original&r=1612788078","https:\/\/storage.ning.com\/topology\/rest\/1.0\/file\/get\/7384211654?profile=original&r=1597044779","https:\/\/storage.ning.com\/topology\/rest\/1.0\/file\/get\/8513921698?profile=original&r=1612432407"];
+            var numSources = sources.length;
+                        var heads = document.getElementsByTagName('head');
+            var node = heads.length > 0 ? heads[0] : document.body;
+            var onloadFunctionsObj = {};
+
+            var createScriptTagFunc = function(source) {
+                var script = document.createElement('script');
+                
+                script.type = 'text/javascript';
+                                var currentOnLoad = function() {xg._loader.onLoad(source);};
+                if (script.readyState) { //for IE (including IE9)
+                    script.onreadystatechange = function() {
+                        if (script.readyState == 'complete' || script.readyState == 'loaded') {
+                            script.onreadystatechange = null;
+                            currentOnLoad();
+                        }
+                    }
+                } else {
+                   script.onerror = script.onload = currentOnLoad;
+                }
+
+                script.src = source;
+                node.appendChild(script);
+            };
+
+            for (var i = 0; i < numSources; i++) {
+                                xg._loader.loading(sources[i]);
+                createScriptTagFunc(sources[i]);
+            }
+        </script>
+<script type="text/javascript">
+if (!ning._) {ning._ = {}}
+ning._.compat = { encryptedToken: "<empty>" }
+ning._.CurrentServerTime = "2021-05-27T11:30:14+00:00";
+ning._.probableScreenName = "";
+ning._.domains = {
+    base: 'ning.com',
+    ports: { http: '80', ssl: '443' }
+};
+ning.loader.version = '202103031431'; // DEP-210517_1:153cda7 33
+djConfig.parseWidgets = false;
+</script>
+<script type="text/javascript">
+        xg.token = '';
+xg.canTweet = false;
+xg.cdnHost = 'static.ning.com';
+xg.version = '202103031431';
+xg.useMultiCdn = true;
+xg.staticRoot = 'socialnetworkmain';
+xg.xnTrackHost = null;
+    xg.cdnDefaultPolicyHost = 'static';
+    xg.cdnPolicy = [];
+xg.global = xg.global || {};
+xg.global.currentMozzle = 'profiles';
+xg.global.userCanInvite = false;
+xg.global.requestBase = '';
+xg.global.locale = 'en_US';
+xg.num_thousand_sep = ",";
+xg.num_decimal_sep = ".";
+(function() {
+    dojo.addOnLoad(function() {
+        if(window.bzplcm) { window.bzplcm.ts('hr'); window.bzplcm._profileSend(); }
+            });
+            ning.loader.require('xg.profiles.blog.show', 'xg.index.like.likeButton', 'xg.shared.PostToFacebookStreamLink', 'xg.index.facebookLike', function() { xg._loader.onLoad('xnloader'); });
+    })();    </script>
+
+<script type="text/javascript">
+xg.addOnRequire(function() {
+    document.getElementById('xn_bar_menu_search').action = 'https://www.datasciencecentral.com/page/search';
+});
+
+</script>
+
+<script type="text/javascript">
+_atrk_opts = { atrk_acct:"QpAKm1aMp4Z352", domain:"datasciencecentral.com",dynamic: true};
+(function() { var as = document.createElement('script'); as.type = 'text/javascript'; as.async = true; as.src = "https://d31qbv1cthcecs.cloudfront.net/atrk.js"; var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(as, s); })();
+</script>
+<noscript><img src="https://d5nxst8fruw4z.cloudfront.net/atrk.gif?account=QpAKm1aMp4Z352" style="display:none" height="1" width="1" alt="" /></noscript>
+
+
+<link href="https://cdn.datasciencecentral.com/css/style020170126141034-6-7.css" rel="stylesheet" type="text/css" />
+<script src="https://cdn.datasciencecentral.com/js/script020170126141034-17.js"></script>
+
+
+<script src="https://cdn.datasciencecentral.com/search/as.js"></script>
+
+
+<script src="https://cdn.datasciencecentral.com/js/script020171208141034-13-16.js"></script>
+
+
+<style>
+/* hr rounded red border */
+hr.red {
+    height: 1px;
+    color: #FF0000;
+    background-color: #FF0000;
+    border: none;
+}
+</style>
+<div id="tmp_insideblog" style="display:none;">
+<div class='dscAdAppear' zsrc='PGNlbnRlcj48YnIgLz48IS0tIC8yNjcyNjQxL0JveF9BZF9CbG9nIC0tPg0KPGRpdiBpZD0nZGl2LWdwdC1hZC0xNTEyNDI4OTAyODQ2LTInIHN0eWxlPSdoZWlnaHQ6MjUwcHg7IHdpZHRoOjMwMHB4Oyc+DQo8c2NyaXB0Pg0KZ29vZ2xldGFnLmNtZC5wdXNoKGZ1bmN0aW9uKCkgeyBnb29nbGV0YWcuZGlzcGxheSgnZGl2LWdwdC1hZC0xNTEyNDI4OTAyODQ2LTInKTsgfSk7DQo8L3NjcmlwdD4NCjwvZGl2PjxiciAvPg0KPC9jZW50ZXI+'></div>
+<hr class="red" />
+<p><span style="font-size: 11pt;"><strong>Most Popular Content on DSC</strong></span></p>
+<p><span style="font-size: 11pt;">To not miss this type of content in the future,&nbsp;<a href="https://www.datasciencecentral.com/profiles/blogs/check-out-our-dsc-newsletter">subscribe</a>&nbsp;to our newsletter.</span></p>
+<ul>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/fee-book-applied-stochastic-processes" target="_blank">Book: Applied Stochastic Processes</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/long-range-correlation-in-time-series-tutorial-and-case-study" target="_blank">Long-range Correlations in Time Series: Modeling, Testing, Case Study</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/how-to-automatically-determine-the-number-of-clusters-in-your-dat" target="_blank">How to Automatically Determine the Number of Clusters in your Data</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/new-data-science-cheat-sheet" target="_blank">New Machine Learning Cheat Sheet</a> | <a href="https://www.datasciencecentral.com/profiles/blogs/data-science-cheat-sheet" target="_blank">Old one</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/confidence-intervals-without-pain" target="_blank">Confidence Intervals Without Pain - With Resampling</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/advanced-machine-learning-with-basic-excel" target="_blank">Advanced Machine Learning with Basic Excel</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/decomposition-of-statistical-distributions-using-mixture-models-a" target="_blank">New Perspectives on Statistical Distributions and Deep Learning</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/fascinating-new-results-in-the-theory-of-randomness" target="_blank">Fascinating New Results in the Theory of Randomness</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/feature-selection-based-on-predictive-power" target="_blank">Fast Combinatorial Feature Selection</a></span></li>
+</ul>
+<p><span style="font-size: 11pt;"><strong>Other popular resources</strong></span></p>
+<ul>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/comprehensive-repository-of-data-science-and-ml-resources" target="_blank">Comprehensive Repository of Data Science and ML Resources</a>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/page/search?q=statistical+concepts" target="_blank">Statistical Concepts Explained in Simple English</a>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/page/search?q=in+one+pictures" target="_blank">Machine Learning Concepts Explained in One Picture</a>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/100-data-science-interview-questions-and-answers" target="_blank">100 Data Science Interview Questions and Answers</a>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/page/search?q=cheat+sheets" target="_blank">Cheat Sheets</a> |
+<a href="https://www.datasciencecentral.com/profiles/blogs/21-curated-blogs-about-deep-learning-and-data-science" target="_blank">Curated Articles</a> |
+<a href="https://www.datasciencecentral.com/page/search?q=Python" target="_blank">Search</a> |
+<a href="http://www.analytictalent.com" target="_blank">Jobs</a> |
+<a href="https://www.datasciencecentral.com/page/search?q=courses" target="_blank">Courses</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blog/new" target="_blank">Post a Blog</a> |
+<a href="https://www.datasciencecentral.com/forum/topic/new" target="_blank">Forum Questions</a> |
+<a href="https://www.datasciencecentral.com/page/search?q=books" target="_blank">Books</a> |
+<a href="https://www.datasciencecentral.com/page/search?q=salary" target="_blank">Salaries</a> |
+<a href="https://www.bigdatanews.datasciencecentral.com/group/bdn-daily-press-releases/forum" target="_blank">News</a>
+</span></li>
+</ul>
+<p><span style="font-size: 11pt;"><strong>Archives:</strong></span> <span style="font-size: 11pt;"><a href="https://www.analyticbridge.datasciencecentral.com/page/links" target="_blank">2008-2014</a> |
+<a href="https://www.datasciencecentral.com/group/resources/forum/topics/selection-of-best-articles-from-our-past-weekly-digests" target="_blank">2015-2016</a> |
+<a href="https://www.datasciencecentral.com/page/previous-digests" target="_blank">2017-2019</a> |
+<a href="https://www.analyticbridge.datasciencecentral.com/group/data-science/forum/topics/data-science-e-book-first-draft-available-for-download" target="_blank">Book 1</a> |
+<a href="https://www.datasciencecentral.com/profiles/blogs/my-data-science-book" target="_blank">Book 2</a> |
+<a href="https://www.datasciencecentral.com/profiles/blogs/older-data-science-articles-still-of-great-value-today" target="_blank">More</a>
+</span></p>
+<p><span style="font-size: 11pt;"><strong>Follow us</strong></span>:<span style="font-size: 11pt;"><span>&nbsp;</span><a href="https://twitter.com/DataScienceCtrl">Twitter</a><span>&nbsp;</span>|<span>&nbsp;</span><a href="https://www.facebook.com/DataScienceCentralCommunity/">Facebook</a></span></p>
+</div>
+<script type="text/javascript">
+if (typeof(x$) != 'undefined') {
+x$(".xg_widget_profiles_blog_show .xg_blog .postbody").after('<div id="insideblog"></div>');
+var t_insideblogCode = document.getElementById('tmp_insideblog');
+var insideblogCode = document.getElementById('insideblog');
+insideblogCode.innerHTML = t_insideblogCode.innerHTML;
+}
+</script>
+
+
+<div id="tmp_insideforum" style="display:none;">
+<div class='dscAdAppear' zsrc='PGNlbnRlcj48YnIgLz48IS0tIC8yNjcyNjQxL0JveF9BZF9Gb3J1bSAtLT4NCjxkaXYgaWQ9J2Rpdi1ncHQtYWQtMTUxMjQyODkwMjg0Ni0zJyBzdHlsZT0naGVpZ2h0OjI1MHB4OyB3aWR0aDozMDBweDsnPg0KPHNjcmlwdD4NCmdvb2dsZXRhZy5jbWQucHVzaChmdW5jdGlvbigpIHsgZ29vZ2xldGFnLmRpc3BsYXkoJ2Rpdi1ncHQtYWQtMTUxMjQyODkwMjg0Ni0zJyk7IH0pOw0KPC9zY3JpcHQ+DQo8L2Rpdj48YnIgLz4NCjwvY2VudGVyPg=='></div>
+<hr class="red" />
+<p><span style="font-size: 12pt;"><strong>Most popular articles</strong></span><p>
+<ul>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/new-books-and-resources-for-dsc-members">Free Book and Resources for DSC Members</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/decomposition-of-statistical-distributions-using-mixture-models-a">New Perspectives on Statistical Distributions and Deep Learning</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/data-science-wizardry">Time series, Growth Modeling and Data Science Wizardy</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/page/search?q=statistical+concepts">Statistical Concepts Explained in Simple English</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/page/search?q=in+one+pictures">Machine Learning Concepts Explained in One Picture</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/comprehensive-repository-of-data-science-and-ml-resources">Comprehensive Repository of Data Science and ML Resources</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/advanced-machine-learning-with-basic-excel">Advanced Machine Learning with Basic Excel</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/difference-between-machine-learning-data-science-ai-deep-learning">Difference between ML, Data Science, AI, Deep Learning, and Statistics</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/my-data-science-machine-learning-and-related-articles">Selected Business Analytics, Data Science and ML articles</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/how-to-automatically-determine-the-number-of-clusters-in-your-dat">How to Automatically Determine the Number of Clusters in your Data</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blogs/fascinating-new-results-in-the-theory-of-randomness">Fascinating New Results in the Theory of Randomness</a></span></li>
+<li><span style="font-size: 11pt;">
+<a href="http://careers.analytictalent.com/jobs/products">Hire a Data Scientist</a> |
+<a href="https://www.datasciencecentral.com/page/search?q=Python">Search DSC</a> |
+<a href="http://www.analytictalent.com">Find a Job</a></span></li>
+<li><span style="font-size: 11pt;"><a href="https://www.datasciencecentral.com/profiles/blog/new">Post a Blog</a> |
+<a href="https://www.datasciencecentral.com/forum/topic/new">Forum Questions</a></span></li>
+</ul>
+</div>
+<script type="text/javascript">
+if (typeof(x$) != 'undefined') {
+x$(".xg_widget_forum_topic_show div.discussion div.description").after('<div id="insideforum"></div>');
+var t_insideforumCode = document.getElementById('tmp_insideforum');
+var insideforumCode = document.getElementById('insideforum');
+insideforumCode.innerHTML = t_insideforumCode.innerHTML;
+}
+</script>
+
+
+<script>
+x$('li:contains("Block all emails from")').hide();
+</script>
+
+
+<script>
+x$(document).ready(function(){
+  var dashbrd = x$( "#xj_admin_menu_link" ).length
+  var pathNameLoc = window.location.pathname;
+  var pathNameSplit = pathNameLoc.split('/');
+if (dashbrd == 1) {
+x$('input.radio').removeClass('disabled').removeAttr('disabled'); //allow admins to change privacy
+};
+if (dashbrd == 0  && pathNameSplit[2] == 'blog' && pathNameSplit[3] == 'new'){
+x$('fieldset.nolegend fieldset').hide(); }; //for new blog privacy
+if (dashbrd == 0  && pathNameSplit[2] == 'blogs' && pathNameSplit[4] == 'edit') {
+  x$('#post_delete').hide(); }; //for blog remove
+if (dashbrd == 0  && pathNameSplit[1] == 'video') {
+  x$('li').has('.xg_sprite-close').hide(); }; //for videos remove
+if (dashbrd == 0  && pathNameSplit[1] == 'events') {
+  x$('li').has('.xg_sprite-close').hide(); }; //for events remove
+if (dashbrd == 0  && pathNameSplit[1] == 'profiles' && pathNameSplit[2] == 'blogs') {
+  x$('#deleteBlogPostLink').hide(); }; //for blog remove
+if (dashbrd == 0  && pathNameSplit[1] == 'forum' && pathNameSplit[2] == 'topics') {
+    x$('li').has('.xg_sprite-close').hide(); };  // for forum remove
+if (dashbrd == 0  && pathNameSplit[2] == 'settings' && pathNameSplit[3] == 'editProfileInfo'){
+x$('input#fullname').css('pointer-events','none');
+x$('#post_form input.disabled.radio').removeAttr('disabled').removeClass('disabled');
+x$('a.action-opposite').on('click', function () {
+  setTimeout(function(){
+x$('#dialog_additional_checkbox').removeAttr('checked');
+x$('p').has('#dialog_additional_checkbox').hide(); 
+    }, 100);
+});};}); // for profile edit
+</script>
+
+
+<script>
+document.querySelectorAll('a[href*="http://"]').forEach(item=>{
+let link = item.getAttribute('href');
+if(link.indexOf('https://') > -1) {
+link = link.replace('http://','');
+item.setAttribute('href', link);
+item.innerText = link;
+}
+})
+document.querySelectorAll('small').forEach(item=>{if(item.innerText === 'http://') {item.remove()}})
+document.addEventListener('DOMContentLoaded', _=>{
+const regForm = document.querySelector('.xg_widget_main_authorization_newProfile #profile_form .profile_questions');
+if(regForm !== null)  {
+document.querySelector('.button.left').setAttribute("disabled", "disabled");
+document.querySelector('.tos.right').remove();
+const form = `<div class="lf-input__wrap privacy">
+                        <div class="checking_form ">
+                       <p>
+                         <input class="xg_check__styled" type="checkbox" name="term_accept" id="termAccept" required>
+                         <label for="termAccept">* I agree to TechTarget’s <a href="https://www.techtarget.com/terms-of-use/" target="_blank">Terms of Use</a>, <a href="https://www.techtarget.com/privacy-policy/" target="_blank">Privacy Policy</a>, and the transfer of my information to the United States for processing to provide me with relevant information as described in our Privacy Policy.</label>
+                        </p>
+                      <p>
+                                        <input class="xg_check__styled" type="checkbox" name="privacy_accept" id="privacyAccept" required>
+                                        <label for="privacyAccept">* I agree to my information being processed by TechTarget and its <a href="https://www.techtarget.com/privacy-partners/" target="_blank">Partners</a> to contact me via phone, email, or other means regarding information relevant to my professional interests. I may unsubscribe at any time.</label>
+                                    </p>                                     
+                </div>                        
+               </div>`
+
+regForm.insertAdjacentHTML('afterend', form);
+
+document.querySelector('.checking_form').addEventListener('change', (e)=>{
+
+if(Array.from(document.querySelectorAll('.xg_check__styled')).filter(checkbox => checkbox.checked).length === 2) {
+document.querySelector('.button.left').removeAttribute("disabled")
+}
+else {
+document.querySelector('.button.left').setAttribute("disabled", "disabled")
+}
+}, true)
+}
+})
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+
+const privacyPolicy = document.querySelector('.xj_foot_content a[href*="/privacyPolicy"]');
+const termsOfService = document.querySelector('.xj_foot_content a[href*="/termsOfService"]');
+if(privacyPolicy!==null && termsOfService!==null) {
+privacyPolicy.setAttribute("href","https://www.techtarget.com/privacy-policy/")
+termsOfService.setAttribute("href","https://www.techtarget.com/terms-of-use/")
+privacyPolicy.style.display = 'inline-block'
+termsOfService.style.display = 'inline-block'
+}
+})
+</script>
+
+
+<script>
+    window.__tcfapi('addEventListener', 2, function (tcData, listenerSuccess) {
+        if ((typeof(tcData) !== 'undefined') && (tcData !== null)) {
+            if (listenerSuccess && (tcData.eventStatus === 'tcloaded' || tcData.eventStatus === 'cmpuishown')) {
+                window.__tcfapi('removeEventListener', 2, function (success) {
+                    if (success) {
+			window.__tcfapi('ping', 2, function (pingReturn) {
+				if (pingReturn.gdprApplies) {
+          var termsOfService = document.querySelector('.right.xg_lightfont');
+          termsOfService.append(" | ")
+          var aTag = document.createElement('a');
+          aTag.setAttribute('href',"#");
+          aTag.setAttribute('onclick',"window._sp_.loadPrivacyManagerModal(329477)");
+          aTag.innerText = "Cookie Preferences";
+          termsOfService.appendChild(aTag);
+				}
+                        });
+                    }
+                }, tcData.listenerId);
+            }
+        }
+    });
+</script>
+
+<style>
+#cmp-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 100; }
+  @media (min-width: 960px) {
+    #cmp-banner {
+      bottom: 20px; } }
+</style>
+<script type="text/javascript">
+console.log('Processing splash');
+var introTxtEmail = document.getElementsByClassName("options")[0].getElementsByTagName("strong")[0].textContent;
+console.log(introTxtEmail.replace("DataScienceCentral","TechTarget"));
+console.log(document.getElementsByClassName("options")[0].getElementsByTagName("a")[2].getAttribute("_url"));
+var stopEmails = document.getElementsByClassName("options")[0].getElementsByTagName("a")[2].getAttribute("_url");
+console.log(stopEmails);
+var list = document.getElementsByClassName("options")[0];
+var bodypart0 = "<p>".concat(introTxtEmail.replace("DataScienceCentral","TechTarget")).concat("<br /><br/>");
+var bodypart1 = "Stop receiving all emails from TechTarget.com<br /><a href='mailto:ttgtprivacy@techtarget.com?subject=Unsubscribe me from all TechTarget commercial emails – DSC&body=This email is a request to unsubscribe you from all TechTarget commercial emails.  Please add your Name and Company below, to assist us in confirming we are unsubscribing the correct person.'>Unsubscribe<\/a><br /><br />Stop receiving all emails from Data Science Central<br /><a href='".concat(stopEmails);
+var bodypart2 = "'>Unsubscribe<\/a><br /><br />Choose which emails you receive<br /><a href='https://www.datasciencecentral.com/profiles/profile/emailSettings'>Change Email Settings<\/a><br /><\/p>";
+var bodyText = bodypart0.concat(bodypart1).concat(bodypart2);
+document.getElementsByClassName("options")[0].innerHTML = bodyText;
+</script><script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!dataLayer) {
+            return;
+        }
+        var handler = function (event) {
+            var element = event.currentTarget;
+            if (element.hasAttribute('data-track-disable')) {
+                return;
+            }
+            var options = JSON.parse(element.getAttribute('data-track'));
+            dataLayer.push({
+                'event'         : 'trackEvent',
+                'eventType'     : 'googleAnalyticsNetwork',
+                'eventCategory' : options && options.category || '',
+                'eventAction'   : options && options.action || '',
+                'eventLabel'    : options && options.label || '',
+                'eventValue'    : options && options.value || ''
+            });
+        };
+        var elements = document.querySelectorAll('[data-track]');
+        for (var i = 0; i < elements.length; i++) {
+            elements[i].addEventListener('click', handler);
+        }
+    });
+</script>
+</div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# Notebooks
+# Notes on Workboks
 ### improve_data_quality
 [improve_data_quality](./improve_data_quality.ipynb)
 Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/launching_into_ml/labs/improve_data_quality.ipynb)

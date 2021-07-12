@@ -1,4 +1,4 @@
-# Notebooks
+# Notes on Workbooks
 ### tensors_variables
 [tensors_variables](./tensors_variables.ipynb)
 Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/introduction_to_tensorflow/labs/tensors-variables.ipynb)

@@ -69,3 +69,171 @@ SELECT
 FROM
   `feat_eng.feateng_training_data`
 ```
+### 3_keras_basic_feat_eng.ipynb
+[3_keras_basic_feat_eng.ipynb](./3_keras_basic_feat_eng.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/feature_engineering/labs/3_keras_basic_feat_eng-lab.ipynb)
+1. Let's split the dataset into train, validation, and test sets
+```
+train, test = train_test_split(housing_df, test_size=0.2)
+print(len(train), 'intial train examples with test')
+train, val = train_test_split(train, test_size=0.2)
+print(len(train), 'final train examples with val')
+print(len(val), 'validation examples')
+print(len(test), 'test examples')
+```
+```
+train.to_csv('../data/housing-train.csv', encoding='utf-8', index=False)
+
+val.to_csv('../data/housing-val.csv', encoding='utf-8', index=False)
+
+test.to_csv('../data/housing-test.csv', encoding='utf-8', index=False)
+```
+2. A utility method to create a tf.data dataset from a Pandas Dataframe
+```
+def df_to_dataset(dataframe, shuffle=True, batch_size=32):
+    dataframe = dataframe.copy()
+    labels = dataframe.pop('median_house_value')
+    ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
+    if shuffle:
+        ds = ds.shuffle(buffer_size=len(dataframe))
+    ds = ds.batch(batch_size)
+    return ds
+```
+3. Print features
+```
+for feature_batch, label_batch in train_ds.take(1):
+    print('Every feature:', list(feature_batch.keys()))
+    print('A batch of households:', feature_batch['households'])
+    print('A batch of ocean_proximity:', feature_batch['ocean_proximity'])
+    print('A batch of targets:', label_batch)
+```
+4. create a variable called `numeric_cols` to hold only the numerical feature columns.
+```
+numeric_cols = ['longitude', 'latitude', 'housing_median_age', 'total_rooms',
+                'total_bedrooms', 'population', 'households', 'median_income']
+```
+5. #### Scaler function
+It is very important for numerical variables to get scaled before they are "fed" into the neural network. Here we use min-max scaling. Here we are creating a function named 'get_scal' which takes a list of numerical features and returns a 'minmax' function, which will be used in tf.feature_column.numeric_column() as normalizer_fn in parameters. 'Minmax' function itself takes a 'numerical' number from a particular feature and return scaled value of that number. 
+
+Next, we scale the numerical feature columns that we assigned to the variable "numeric cols".
+
+```
+# 'get_scal' function takes a list of numerical features and returns a 'minmax' function
+# 'Minmax' function itself takes a 'numerical' number from a particular feature and return scaled value of that number.
+# Scalar def get_scal(feature):
+def get_scal(feature):
+    def minmax(x):
+        mini = train[feature].min()
+        maxi = train[feature].max()
+        return (x - mini)/(maxi-mini)
+        return(minmax)
+```
+```
+feature_columns = []
+for header in numeric_cols:
+    scal_input_fn = get_scal(header)
+    feature_columns.append(fc.numeric_column(header,
+                                             normalizer_fn=scal_input_fn))
+```
+Next, we should validate the total number of feature columns. Compare this number to the number of numeric features you input earlier.
+```
+print('Total number of feature coLumns: ', len(feature_columns))
+```
+6. Create kera sequential model
+```
+# Model create
+# `tf.keras.layers.DenseFeatures()` is a layer that produces a dense Tensor based on given feature_columns.
+feature_layer = tf.keras.layers.DenseFeatures(feature_columns, dtype='float64')
+
+# `tf.keras.Sequential()` groups a linear stack of layers into a tf.keras.Model.
+model = tf.keras.Sequential([
+  feature_layer,
+  layers.Dense(12, input_dim=8, activation='relu'),
+  layers.Dense(8, activation='relu'),
+  layers.Dense(1, activation='linear',  name='median_house_value')
+])
+
+# Model compile
+model.compile(optimizer='adam',
+              loss='mse',
+              metrics=['mse'])
+
+# Model Fit
+history = model.fit(train_ds,
+                    validation_data=val_ds,
+                    epochs=32)
+```
+7. We show loss as Mean Square Error (MSE). Remember that MSE is the most commonly used regression loss function. MSE is the sum of squared distances between our target variable (e.g. housing median age) and predicted values.
+```
+# Let's show loss as Mean Square Error (MSE)
+loss, mse = model.evaluate(train_ds)
+print("Mean Squared Error", mse)
+```
+8. #### Visualize the model loss curve
+
+Next, we will use matplotlib to draw the model's loss curves for training and validation.  A line plot is also created showing the mean squared error loss over the training epochs for both the train (blue) and test (orange) sets.
+```
+# Use matplotlib to draw the model's loss curves for training and validation
+def plot_curves(history, metrics):
+    nrows = 1
+    ncols = 2
+    fig = plt.figure(figsize=(10, 5))
+
+    for idx, key in enumerate(metrics):  
+        ax = fig.add_subplot(nrows, ncols, idx+1)
+        plt.plot(history.history[key])
+        plt.plot(history.history['val_{}'.format(key)])
+        plt.title('model {}'.format(key))
+        plt.ylabel(key)
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left');  
+```
+```
+plot_curves(history, ['loss', 'mse'])
+```
+9. Test model prediction
+```
+# Ocean_proximity is NEAR OCEAN
+model.predict({
+    'longitude': tf.convert_to_tensor([-122.43]),
+    'latitude': tf.convert_to_tensor([37.63]),
+    'housing_median_age': tf.convert_to_tensor([34.0]),
+    'total_rooms': tf.convert_to_tensor([4135.0]),
+    'total_bedrooms': tf.convert_to_tensor([687.0]),
+    'population': tf.convert_to_tensor([2154.0]),
+    'households': tf.convert_to_tensor([742.0]),
+    'median_income': tf.convert_to_tensor([4.9732]),
+    'ocean_proximity': tf.convert_to_tensor(['NEAR OCEAN'])
+}, steps=1)
+```
+10. Next, we create a categorical feature using `ocean_proximity`
+```
+for feature_name in categorical_cols:
+    vocabulary = housing_df[feature_name].unique()
+    categorical_c = fc.categorical_column_with_vocabulary_list(feature_name, vocabulary)
+    one_hot = fc.indicator_column(categorical_c)
+    feature_columns.append(one_hot)
+```
+11. Next we create a bucketized column using `housing_median_age`
+```
+age = fc.numeric_column("housing_median_age")
+
+# Bucketized cols
+age_buckets = fc.bucketized_column(age, boundaries=[10, 20, 30, 40, 50, 60, 80, 100])
+feature_columns.append(age_buckets)
+```
+12. ### Feature Cross
+
+Combining features into a single feature, better known as [feature crosses](https://developers.google.com/machine-learning/glossary/#feature_cross), enables a model to learn separate weights for each combination of features.
+
+Next, we create a feature cross of `housing_median_age` and `ocean_proximity`
+```
+vocabulary = housing_df['ocean_proximity'].unique()
+ocean_proximity = fc.categorical_column_with_vocabulary_list('ocean_proximity',
+                                                             vocabulary)
+
+crossed_feature = fc.crossed_column([age_buckets, ocean_proximity],
+                                    hash_bucket_size=1000)
+crossed_feature = fc.indicator_column(crossed_feature)
+feature_columns.append(crossed_feature)
+```

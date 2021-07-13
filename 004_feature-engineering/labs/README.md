@@ -237,3 +237,25 @@ crossed_feature = fc.crossed_column([age_buckets, ocean_proximity],
 crossed_feature = fc.indicator_column(crossed_feature)
 feature_columns.append(crossed_feature)
 ```
+### grepc.py
+[grepc.py](./grepc.py)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/data_analysis/lab2/python/grepc.py)
+### Learnings
+1. Setting bucket name in cloudshell
+```
+BUCKET="<your unique bucket name (Project ID)>"
+echo $BUCKET
+```
+2. Using `nano` to check out file
+```
+cd ~/training-data-analyst/courses/data_analysis/lab2/python
+nano grep.py
+```
+### is_popular.py
+[is_popular.py](./is_popular.py)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/data_analysis/lab2/python/is_popular.py)
+### Learnings
+1. Examine the output file with `cat`
+```
+cat /tmp/output-*
+```

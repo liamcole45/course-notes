@@ -259,3 +259,7 @@ Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-anal
 ```
 cat /tmp/output-*
 ```
+### Dataprep Lab
+Scheduling and sampling arrive for Google Cloud Dataprep blog/instructions found [here](https://cloud.google.com/blog/products/gcp/scheduling-and-sampling-arrive-for-google-cloud-dataprep)
+
+Lab quiz results [here](../004_feature-engineering/quizzes/06_preprocessing_with_cloud_dataprep/)

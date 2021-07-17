@@ -263,3 +263,55 @@ cat /tmp/output-*
 Scheduling and sampling arrive for Google Cloud Dataprep blog/instructions found [here](https://cloud.google.com/blog/products/gcp/scheduling-and-sampling-arrive-for-google-cloud-dataprep)
 
 Lab quiz results [here](../quizzes/06_preprocessing_with_cloud_dataprep)
+
+### Feature Hashing Scheme
+Code gathered from this [article](https://towardsdatascience.com/understanding-feature-engineering-part-2-categorical-data-f54324193e63). Illustrates how to encode categorical variables into dummy variables with as less columns as possible
+```
+unique_genres = np.unique(vg_df[['Genre']])
+print("Total game genres:", len(unique_genres))
+print(unique_genres)
+```
+```
+from sklearn.feature_extraction import FeatureHasher
+fh = FeatureHasher(n_features=6, input_type='string')
+hashed_features = fh.fit_transform(vg_df['Genre'])
+hashed_features = hashed_features.toarray()
+pd.concat([vg_df[['Name', 'Genre']], pd.DataFrame(hashed_features)], 
+          axis=1).iloc[1:7]
+```
+### Binarisation on Numberic Columns
+Code gathered from this [article](https://towardsdatascience.com/understanding-feature-engineering-part-1-continuous-numeric-data-da4e47099a7b). Illustrates simple code from sklearn to do binary classifications on a numberic column as opposed to doing a `ifelse` statement
+```
+watched = np.array(popsong_df['listen_count']) 
+watched[watched >= 1] = 1
+popsong_df['watched'] = watched
+```
+```
+from sklearn.preprocessing import Binarizer
+bn = Binarizer(threshold=0.9)
+pd_watched = bn.transform([popsong_df['listen_count']])[0]
+popsong_df['pd_watched'] = pd_watched
+popsong_df.head(11)
+```
+#### Taking Quantiles
+```
+quantile_list = [0, .25, .5, .75, 1.]
+quantiles = fcc_survey_df['Income'].quantile(quantile_list)
+quantiles
+```
+#### Quantile based binning
+```
+quantile_labels = ['0-25Q', '25-50Q', '50-75Q', '75-100Q']
+fcc_survey_df['Income_quantile_range'] = pd.qcut(
+                                            fcc_survey_df['Income'], 
+                                            q=quantile_list)
+fcc_survey_df['Income_quantile_label'] = pd.qcut(
+                                            fcc_survey_df['Income'], 
+                                            q=quantile_list,       
+                                            labels=quantile_labels)
+
+fcc_survey_df[['ID.x', 'Age', 'Income', 'Income_quantile_range', 
+               'Income_quantile_label']].iloc[4:9]
+```
+#### BOC-COx
+Another technique to make things normally distributed

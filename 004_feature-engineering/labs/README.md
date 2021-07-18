@@ -315,3 +315,64 @@ fcc_survey_df[['ID.x', 'Age', 'Income', 'Income_quantile_range',
 ```
 #### BOC-COx
 Another technique to make things normally distributed
+
+### feateng.ipynb and model.py
+
+[feateng.ipynb](./feateng.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/feateng/feateng.ipynb)
+
+[model.py](./model.py)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/feateng/taxifare/trainer/model.py)
+
+### Learnings
+1. Add subsampling criteria by modding with hashkey in BigQuery
+```
+def create_query(phase, EVERY_N):
+  if EVERY_N == None:
+    EVERY_N = 4 #use full dataset
+    
+  #select and pre-process fields
+  base_query = """
+SELECT
+  (tolls_amount + fare_amount) AS fare_amount,
+  DAYOFWEEK(pickup_datetime) AS dayofweek,
+  HOUR(pickup_datetime) AS hourofday,
+  pickup_longitude AS pickuplon,
+  pickup_latitude AS pickuplat,
+  dropoff_longitude AS dropofflon,
+  dropoff_latitude AS dropofflat,
+  passenger_count*1.0 AS passengers,
+  CONCAT(STRING(pickup_datetime), STRING(pickup_longitude), STRING(pickup_latitude), STRING(dropoff_latitude), STRING(dropoff_longitude)) AS key
+FROM
+  [nyc-tlc:yellow.trips]
+WHERE
+  trip_distance > 0
+  AND fare_amount >= 2.5
+  AND pickup_longitude > -78
+  AND pickup_longitude < -70
+  AND dropoff_longitude > -78
+  AND dropoff_longitude < -70
+  AND pickup_latitude > 37
+  AND pickup_latitude < 45
+  AND dropoff_latitude > 37
+  AND dropoff_latitude < 45
+  AND passenger_count > 0
+  """
+  
+  #add subsampling criteria by modding with hashkey
+  if phase == 'train': 
+    query = "{} AND ABS(HASH(pickup_datetime)) % {} < 2".format(base_query,EVERY_N)
+  elif phase == 'valid': 
+    query = "{} AND ABS(HASH(pickup_datetime)) % {} == 2".format(base_query,EVERY_N)
+  elif phase == 'test':
+    query = "{} AND ABS(HASH(pickup_datetime)) % {} == 3".format(base_query,EVERY_N)
+  return query
+    
+print(create_query('valid', 100)) #example query using 1% of data
+```
+2. How to head files in bash
+```
+%%bash
+#print first 10 lines of first shard of train.csv
+gsutil cat "gs://$BUCKET/taxifare/ch4/taxi_preproc/train.csv-00000-of-*" | head
+```

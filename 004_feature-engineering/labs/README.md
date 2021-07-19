@@ -376,3 +376,222 @@ print(create_query('valid', 100)) #example query using 1% of data
 #print first 10 lines of first shard of train.csv
 gsutil cat "gs://$BUCKET/taxifare/ch4/taxi_preproc/train.csv-00000-of-*" | head
 ```
+
+### 2_bqml_adv_feat_eng-lab.ipynb
+
+[2_bqml_adv_feat_eng-lab.ipynb](./2_bqml_adv_feat_eng-lab.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/feature_engineering/labs/2_bqml_adv_feat_eng-lab.ipynb)
+
+1. Create a BigQuery dataset in `bash`
+```
+%%bash
+
+# Create a BigQuery dataset for feat_eng if it doesn't exist
+datasetexists=$(bq ls -d | grep -w feat_eng)
+
+if [ -n "$datasetexists" ]; then
+    echo -e "BigQuery dataset already exists, let's not recreate it."
+
+else
+    echo "Creating BigQuery dataset titled: feat_eng"
+    
+    bq --location=US mk --dataset \
+        --description 'Taxi Fare' \
+        $PROJECT:feat_eng
+   echo "\n Here are your current datasets:"
+   bq ls
+fi
+```
+2. **NOTE:** Because you performed a linear regression, the results include the following columns:
+
+*   mean_absolute_error
+*   mean_squared_error
+*   mean_squared_log_error
+*   median_absolute_error
+*   r2_score
+*   explained_variance
+
+**Resource** for an explanation of the [Regression Metrics](https://towardsdatascience.com/metrics-to-evaluate-your-machine-learning-algorithm-f10ba6e38234).
+
+**Mean squared error** (MSE) - Measures the difference between the values our model predicted using the test set and the actual values. You can also think of it as the distance between your regression (best fit) line and the predicted values. 
+
+**Root mean squared error** (RMSE) - The primary evaluation metric for this ML problem is the root mean-squared error. RMSE measures the difference between the predictions of a model, and the observed values. A large RMSE is equivalent to a large average error, so smaller values of RMSE are better. One nice property of RMSE is that the error is given in the units being measured, so you can tell very directly how incorrect the model might be on unseen data.
+
+**R2**:  An important metric in the evaluation results is the R2 score. The R2 score is a statistical measure that determines if the linear regression predictions approximate the actual data. Zero (0) indicates that the model explains none of the variability of the response data around the mean.  One (1) indicates that the model explains all the variability of the response data around the mean.
+
+3. ### Model 4:  Apply the ML.FEATURE_CROSS clause to categorical features
+
+BigQuery ML now has ML.FEATURE_CROSS, a pre-processing clause that performs a feature cross.  
+
+* ML.FEATURE_CROSS generates a [STRUCT](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#struct-type) feature with all combinations of crossed categorical features, except for 1-degree items (the original features) and self-crossing items.  
+
+* Syntax:  ML.FEATURE_CROSS(STRUCT(features), degree)
+
+* The feature parameter is a categorical features separated by comma to be crossed. The maximum number of input features is 10. An unnamed feature is not allowed in features. Duplicates are not allowed in features.
+
+* Degree(optional): The highest degree of all combinations. Degree should be in the range of [1, 4]. Default to 2.
+
+Output: The function outputs a STRUCT of all combinations except for 1-degree items (the original features) and self-crossing items, with field names as concatenation of original feature names and values as the concatenation of the column string values.
+
+```
+%%bigquery
+
+CREATE OR REPLACE MODEL feat_eng.model_4
+OPTIONS
+  (model_type='linear_reg',
+    input_label_cols=['fare_amount'])  
+AS
+SELECT
+  fare_amount,
+  passengers,
+ ML.FEATURE_CROSS(STRUCT(CAST(EXTRACT(DAYOFWEEK FROM pickup_datetime) AS STRING) AS dayofweek,
+  CAST(EXTRACT(HOUR FROM pickup_datetime) AS STRING) AS hourofday)) AS day_hr,
+  pickuplon,
+  pickuplat,
+  dropofflon,
+  dropofflat
+FROM `feat_eng.feateng_training_data`
+```
+```
+%%bigquery
+SELECT
+  SQRT(mean_squared_error) AS rmse
+FROM
+  ML.EVALUATE(MODEL feat_eng.model_4)
+```
+
+4. Because the lat and lon by themselves don't have meaning, but only in conjunction, it may be useful to treat the fields as a pair instead of just using them as numeric values. However, lat and lon are continuous numbers, so we have to discretize them first. That's what SnapToGrid does. 
+
+
+* ST_SNAPTOGRID:  ST_SNAPTOGRID(geography_expression, grid_size).  Returns the input GEOGRAPHY, where each vertex has been snapped to a longitude/latitude grid. The grid size is determined by the grid_size parameter which is given in degrees.
+
+**REMINDER**: The ST_GEOGPOINT creates a GEOGRAPHY with a single point. ST_GEOGPOINT creates a point from the specified FLOAT64 longitude and latitude parameters and returns that point in a GEOGRAPHY value.  The ST_Distance function returns the minimum distance between two spatial objects.  It also returns meters for geographies and SRID units for geometrics.  
+
+5. ### BQML's Pre-processing functions:
+
+Here are some of the preprocessing functions in BigQuery ML:
+* ML.FEATURE_CROSS(STRUCT(features))    does a feature cross of all the combinations
+* ML.POLYNOMIAL_EXPAND(STRUCT(features), degree)    creates x, x<sup>2</sup>, x<sup>3</sup>, etc.
+* ML.BUCKETIZE(f, split_points)   where split_points is an array 
+
+### Model 7:  Apply the BUCKETIZE Function 
+
+
+#### BUCKETIZE 
+Bucketize is a pre-processing function that creates "buckets" (e.g bins) - e.g. it bucketizes a continuous numerical feature into a string feature with bucket names as the value.
+
+* ML.BUCKETIZE(feature, split_points)
+
+* feature: A numerical column.
+
+* split_points: Array of numerical points to split the continuous values in feature into buckets. With n split points (s1, s2 … sn), there will be n+1 buckets generated. 
+
+* Output: The function outputs a STRING for each row, which is the bucket name. bucket_name is in the format of bin_<bucket_number>, where bucket_number starts from 1.
+
+* Currently, our model uses the ST_GeogPoint function to derive the pickup and dropoff feature.  In this lab, we use the BUCKETIZE function to create the pickup and dropoff feature.
+
+```
+%%bigquery
+
+CREATE OR REPLACE MODEL
+  feat_eng.model_7 OPTIONS (model_type='linear_reg',
+    input_label_cols=['fare_amount']) AS
+SELECT
+  fare_amount,
+  passengers,
+  ST_Distance(ST_GeogPoint(pickuplon,
+      pickuplat),
+    ST_GeogPoint(dropofflon,
+      dropofflat)) AS euclidean,
+  ML.FEATURE_CROSS(STRUCT(CAST(EXTRACT(DAYOFWEEK
+        FROM
+          pickup_datetime) AS STRING) AS dayofweek,
+      CAST(EXTRACT(HOUR
+        FROM
+          pickup_datetime) AS STRING) AS hourofday)) AS day_hr,
+  CONCAT( 
+      ML.BUCKETIZE(pickuplon, GENERATE_ARRAY(-78, -70, 0.01)), 
+      ML.BUCKETIZE(pickuplat, GENERATE_ARRAY(37, 45, 0.01)), 
+      ML.BUCKETIZE(dropofflon, GENERATE_ARRAY(-78, -70, 0.01)), 
+      ML.BUCKETIZE(dropofflat, GENERATE_ARRAY(37, 45, 0.01)) 
+  ) AS pickup_and_dropoff
+FROM
+  `feat_eng.feateng_training_data`
+```
+```
+%%bigquery
+SELECT
+  *
+FROM
+  ML.EVALUATE(MODEL feat_eng.model_7)
+```
+6. Apply the TRANSFORM clause and L2 Regularization
+
+##### [L2 Regularization](https://developers.google.com/machine-learning/glossary/#L2_regularization) 
+Sometimes, the training RMSE is quite reasonable, but the evaluation RMSE illustrate more error. Given the severity of the delta between the EVALUATION RMSE and the TRAINING RMSE, it may be an indication of overfitting. When we do feature crosses, we run into the risk of overfitting (for example, when a particular day-hour combo doesn't have enough taxi rides).
+
+Overfitting is a phenomenon that occurs when a machine learning or statistics model is tailored to a particular dataset and is unable to generalize to other datasets. This usually happens in complex models, like deep neural networks.  Regularization is a process of introducing additional information in order to prevent overfitting.
+
+Therefore, we will apply L2 Regularization to the final model.  As a reminder, a regression model that uses the L1 regularization technique is called Lasso Regression while a regression model that uses the L2 Regularization technique is called Ridge Regression.  **The key difference between these two is the penalty term.  Lasso shrinks the less important feature’s coefficient to zero, thus removing some features altogether.  Ridge regression adds “squared magnitude” of coefficient as a penalty term to the loss function**
+
+In other words, L1 limits the size of the coefficients. L1 can yield sparse models (i.e. models with few coefficients); Some coefficients can become zero and eliminated. 
+
+L2 regularization adds an L2 penalty equal to the square of the magnitude of coefficients. L2 will not yield sparse models and all coefficients are shrunk by the same factor (none are eliminated). 
+
+The regularization terms are ‘constraints’ by which an optimization algorithm must ‘adhere to’ when minimizing the loss function, apart from having to minimize the error between the true y and the predicted ŷ.  This in turn reduces model complexity, making our model simpler. A simpler model can reduce the chances of overfitting.
+```
+(input_label_cols=['fare_amount'],
+    model_type='linear_reg',
+    l2_reg=0.1) AS
+SELECT
+  *
+FROM
+  feat_eng.feateng_training_data
+```
+
+7.  Apply the ML.PREDICT function
+```
+%%bigquery
+
+SELECT
+  *
+FROM
+  ML.PREDICT(MODEL feat_eng.final_model,
+    (
+    SELECT
+      -73.982683 AS pickuplon,
+      40.742104 AS pickuplat,
+      -73.983766 AS dropofflon,
+      40.755174 AS dropofflat,
+      3.0 AS passengers,
+      TIMESTAMP('2019-06-03 04:21:29.769443 UTC') AS pickup_datetime ))
+```
+8. Create a RMSE summary table:
+| Model       | Taxi Fare | Description                           |
+|-------------|-----------|---------------------------------------|
+| model_4     | 9.65      | --Feature cross categorical features  |
+| model_5     | 5.58      | --Create a Euclidian feature column   |
+| model_6     | 5.90      | --Feature cross Geo-location features |
+| model_7     | 6.23      | --Apply the TRANSFORM Clause          |
+| final_model | 5.39      | --Apply L2 Regularization             |
+
+9. Visualize a RMSE bar chart
+```
+import matplotlib.pyplot as plt
+%matplotlib inline
+plt.style.use('ggplot')
+
+x = ['m4', 'm5', 'm6','m7', 'final']
+RMSE = [9.65,5.58,5.90,6.23,5.39]
+
+x_pos = [i for i, _ in enumerate(x)]
+
+plt.bar(x_pos, RMSE, color='green')
+plt.xlabel("Model")
+plt.ylabel("RMSE")
+plt.title("RMSE Model Summary")
+
+plt.xticks(x_pos, x)
+
+plt.show()
+```

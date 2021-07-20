@@ -595,3 +595,159 @@ plt.xticks(x_pos, x)
 
 plt.show()
 ```
+
+### 4_keras_adv_feat_eng-lab.ipynb
+
+[4_keras_adv_feat_eng-lab.ipynb](./4_keras_adv_feat_eng-lab.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/feature_engineering/labs/4_keras_adv_feat_eng-lab.ipynb)
+
+1. Copying files from cloud storage to notebook directory using bash. Let's download the  .csv data by copying the data from a cloud storage bucket.
+```
+if not os.path.isdir("../data"):
+    os.makedirs("../data")
+```
+```
+!gsutil cp gs://cloud-training-demos/feat_eng/data/*.csv ../data
+```
+Let's check that the files were copied correctly and look like we expect them to.
+```
+!ls -l ../data/*.csv
+```
+```
+!head ../data/*.csv
+```
+2. ## Create an input pipeline 
+
+Typically, you will use a two step process to build the pipeline. Step one is to define the columns of data; i.e., which column we're predicting for, and the default values.  Step 2 is to define two functions - a function to define the features and label you want to use and a function to load the training data.  Also, note that pickup_datetime is a string and we will need to handle this in our feature engineered model.  
+```
+CSV_COLUMNS = [
+    'fare_amount',
+    'pickup_datetime',
+    'pickup_longitude',
+    'pickup_latitude',
+    'dropoff_longitude',
+    'dropoff_latitude',
+    'passenger_count',
+    'key',
+]
+LABEL_COLUMN = 'fare_amount'
+STRING_COLS = ['pickup_datetime']
+NUMERIC_COLS = ['pickup_longitude', 'pickup_latitude',
+                'dropoff_longitude', 'dropoff_latitude',
+                'passenger_count']
+DEFAULTS = [[0.0], ['na'], [0.0], [0.0], [0.0], [0.0], [0.0], ['na']]
+DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+```
+3. A function to define features and labels
+```
+def features_and_labels(row_data):
+    for unwanted_col in ['key']:
+        row_data.pop(unwanted_col)
+    label = row_data.pop(LABEL_COLUMN)
+    return row_data, label
+```
+4. A utility method to create a tf.data dataset from a Pandas Dataframe
+```
+def load_dataset(pattern, batch_size=1, mode='eval'):
+    dataset = tf.data.experimental.make_csv_dataset(pattern,
+                                                    batch_size,
+                                                    CSV_COLUMNS,
+                                                    DEFAULTS)
+    dataset = dataset.map(features_and_labels)  # features, label
+    if mode == 'train':
+        dataset = dataset.shuffle(1000).repeat()
+        # take advantage of multi-threading; 1=AUTOTUNE
+        dataset = dataset.prefetch(1)
+    return dataset
+```
+5. ## Create a Baseline DNN Model in Keras
+
+Now let's build the Deep Neural Network (DNN) model in Keras using the functional API. Unlike the sequential API, we will need to specify the input and hidden layers.  Note that we are creating a linear regression baseline model with no feature engineering. Recall that a baseline model is a solution to a problem without applying any machine learning techniques.
+```
+# Build a simple Keras DNN using its Functional API
+def rmse(y_true, y_pred):  # Root mean square error
+    return tf.sqrt(tf.reduce_mean(tf.square(y_pred - y_true)))
+
+
+def build_dnn_model():
+    # input layer
+    inputs = {
+        colname: layers.Input(name=colname, shape=(), dtype='float32')
+        for colname in NUMERIC_COLS
+    }
+
+    # feature_columns
+    feature_columns = {
+        colname: fc.numeric_column(colname)
+        for colname in NUMERIC_COLS
+    }
+
+    # Constructor for DenseFeatures takes a list of numeric columns
+    dnn_inputs = layers.DenseFeatures(feature_columns.values())(inputs)
+
+    # two hidden layers of [32, 8] just in like the BQML DNN
+    h1 = layers.Dense(32, activation='relu', name='h1')(dnn_inputs)
+    h2 = layers.Dense(8, activation='relu', name='h2')(h1)
+
+    # final output is a linear activation because this is regression
+    output = layers.Dense(1, activation='linear', name='fare')(h2)
+    model = models.Model(inputs, output)
+
+    # compile model
+    model.compile(optimizer='adam', loss='mse', metrics=[rmse, 'mse'])
+
+    return model
+```
+6. We'll build our DNN model and inspect the model architecture.
+```
+model = build_dnn_model()
+
+tf.keras.utils.plot_model(model, 'dnn_model.png', show_shapes=False, rankdir='LR')
+```
+7. ## Train the model
+
+To train the model, simply call [model.fit()](https://keras.io/models/model/#fit).  Note that we should really use many more NUM_TRAIN_EXAMPLES (i.e. a larger dataset). We shouldn't make assumptions about the quality of the model based on training/evaluating it on a small sample of the full data.
+
+We start by setting up the environment variables for training, creating the input pipeline datasets, and then train our baseline DNN model.
+```
+TRAIN_BATCH_SIZE = 32 
+NUM_TRAIN_EXAMPLES = 59621 * 5
+NUM_EVALS = 5
+NUM_EVAL_EXAMPLES = 14906
+```
+```
+trainds = load_dataset('../data/taxi-train*',
+                       TRAIN_BATCH_SIZE,
+                       'train')
+evalds = load_dataset('../data/taxi-valid*',
+                      1000,
+                      'eval').take(NUM_EVAL_EXAMPLES//1000)
+
+steps_per_epoch = NUM_TRAIN_EXAMPLES // (TRAIN_BATCH_SIZE * NUM_EVALS)
+
+history = model.fit(trainds,
+                    validation_data=evalds,
+                    epochs=NUM_EVALS,
+                    steps_per_epoch=steps_per_epoch)
+```
+8. ### Visualize the model loss curve
+
+Next, we will use matplotlib to draw the model's loss curves for training and validation.  A line plot is also created showing the mean squared error loss over the training epochs for both the train (blue) and test (orange) sets.
+```
+def plot_curves(history, metrics):
+    nrows = 1
+    ncols = 2
+    fig = plt.figure(figsize=(10, 5))
+
+    for idx, key in enumerate(metrics):  
+        ax = fig.add_subplot(nrows, ncols, idx+1)
+        plt.plot(history.history[key])
+        plt.plot(history.history['val_{}'.format(key)])
+        plt.title('model {}'.format(key))
+        plt.ylabel(key)
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left');    
+```
+```
+plot_curves(history, ['loss', 'mse'])
+```

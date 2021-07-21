@@ -5,7 +5,7 @@ If these notes help 1 person, i'll be happy
 
 Each course I felt I was more effective at making notes/documenting, so apologies if earlier course notes aren't well laid out
 
-This is my attempt to give back the open source community
+This is my attempt to give back to the open source community
 
 ### Navigation
 Completed in this order

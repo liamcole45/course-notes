@@ -751,3 +751,68 @@ def plot_curves(history, metrics):
 ```
 plot_curves(history, ['loss', 'mse'])
 ```
+### Notes from Readings
+1. Cloud Architecture for a Machine Learning (ML) Pipeline. Obtained from [here](https://cloud.google.com/architecture/data-preprocessing-for-ml-with-tf-transform-pt1#high-level_architecture)
+
+![ml_pipe_line_architecture](../pictures/ml_pipe_line_architecture.png "ml_pipe_line_architecture")
+
+2. Where to do the preprocessing - Option 1 [BigQuery](https://cloud.google.com/architecture/data-preprocessing-for-ml-with-tf-transform-pt1#where_to_do_preprocessing)
+```
+# computing stats for normalizing numerical features: f1 and f2
+CREATE OR REPLACE TABLE stats AS
+(
+  SELECT
+    AVG(f1) AS f1_mean,
+    STDDEV(f1) AS f1_stdv,
+    AVG(f2) AS f2_mean,
+    STDDEV(f2) f2_stdv
+ FROM
+    my_dataset.training_data
+)
+# extracting data for training
+SELECT
+  (data.f1 - stats.f1_mean)/stats.f1_stdv AS f1_NORMALIZED,
+  (data.f2 - stats.f2_mean)/stats.f2_stdv AS f2_NORMALIZED,
+  POWER((data.f1 - stats.f1_mean)/stats.f1_stdv,2) AS f1_NORMALIZED_SQUARED,
+  POWER((data.f1 - stats.f1_mean)/stats.f1_stdv,2) AS f2_NORMALIZED_SQUARED,
+  ((data.f1 - stats.f1_mean)/stats.f1_stdv) * ((data.f2 - stats.f2_mean)/stats.f2_stdv) AS f1_X_f2
+FROM
+  my_dataset.training_data AS data
+CROSS JOIN
+  stats
+WHERE #filtering data for training
+  data.entry_year = 2018
+AND
+  data.entry_location = 'Canada'
+```
+```
+#extracting data for prediction
+SELECT
+  (data.f1 - stats.f1_mean)/stats.f1_stdv AS f1_NORMALIZED,
+  (data.f2 - stats.f2_mean)/stats.f2_stdv AS f2_NORMALIZED,
+  POWER((data.f1 - stats.f1_mean)/stats.f1_stdv,2) AS f1_NORMALIZED_SQUARED,
+  POWER((data.f1 - stats.f1_mean)/stats.f1_stdv,2) AS f2_NORMALIZED_SQUARED,
+  ((data.f1 - stats.f1_mean)/stats.f1_stdv) * ((data.f2 - stats.f2_mean)/stats.f2_stdv) AS f1_X_f2
+FROM
+  my_dataset.prediction_data AS data
+CROSS JOIN
+  stats
+```
+3. Where to do the preprocessing - Option 2 [Dataflow](https://cloud.google.com/architecture/data-preprocessing-for-ml-with-tf-transform-pt1#option_b_cloud_dataflow)
+
+![architecture_prediction_dataflow](../pictures/architecture_prediction_dataflow.png "architecture_prediction_dataflow")
+
+4. Where to do the preprocessing - Option 3 [TensorFlow](https://cloud.google.com/architecture/data-preprocessing-for-ml-with-tf-transform-pt1#how_tftransform_works)
+
+`tf.Transform`
+
+![tf.transform_pipeline](../pictures/tf.transform_pipeline.png "tf.transform_pipeline")
+
+5. ## Preprocessing Options Summary
+The following table summarizes the data preprocessing options that were discussed in [this article](https://cloud.google.com/architecture/data-preprocessing-for-ml-with-tf-transform-pt1#preprocessing_options_summary). The table is organized as follows:
+- The rows represent the tools that you can use to implement your transformations.
+- The columns represent the types of the transformation by granularity.
+- The subcolumns (for example, Batch Scoring) represent a model-serving requirement.
+- Each cell represents the recommendation of using the tool (row) to implement a transformation type (column) with respect to the serving requirement (subcolumn).
+
+![preprocessing_options_summary](../pictures/preprocessing_options_summary.png "preprocessing_options_summary")

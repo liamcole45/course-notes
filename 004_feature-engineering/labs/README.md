@@ -816,3 +816,14 @@ The following table summarizes the data preprocessing options that were discusse
 - Each cell represents the recommendation of using the tool (row) to implement a transformation type (column) with respect to the serving requirement (subcolumn).
 
 ![preprocessing_options_summary](../pictures/preprocessing_options_summary.png "preprocessing_options_summary")
+
+## Apache Beam Programming Summary 
+Notes from [reading](https://beam.apache.org/documentation/programming-guide/):
+- Pipeline: A Pipeline encapsulates your entire data processing task, from start to finish. This includes reading input data, transforming that data, and writing output data. All Beam driver programs must create a Pipeline. When you create the Pipeline, you must also specify the execution options that tell the Pipeline where and how to run.
+
+- PCollection: A PCollection represents a distributed data set that your Beam pipeline operates on. The data set can be bounded, meaning it comes from a fixed source like a file, or unbounded, meaning it comes from a continuously updating source via a subscription or other mechanism. Your pipeline typically creates an initial PCollection by reading data from an external data source, but you can also create a PCollection from in-memory data within your driver program. From there, PCollections are the inputs and outputs for each step in your pipeline.
+
+- PTransform: A PTransform represents a data processing operation, or a step, in your pipeline. Every PTransform takes one or more PCollection objects as input, performs a processing function that you provide on the elements of that PCollection, and produces zero or more output PCollection objects.
+
+### Feature Cross Example in [Colab](https://developers.google.com/machine-learning/crash-course/feature-crosses/programming-exercise)
+![rsme_graph_in_code](../pictures/rsme_graph_in_code.png "rsme_graph_in_code")

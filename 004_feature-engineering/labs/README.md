@@ -827,3 +827,9 @@ Notes from [reading](https://beam.apache.org/documentation/programming-guide/):
 
 ### Feature Cross Example in [Colab](https://developers.google.com/machine-learning/crash-course/feature-crosses/programming-exercise)
 ![rsme_graph_in_code](../pictures/rsme_graph_in_code.png "rsme_graph_in_code")
+
+
+tensorflow_on_the_fly_processing
+
+### TensorFlow on the fly data processing pipeline
+![tensorflow_on_the_fly_processing](../pictures/tensorflow_on_the_fly_processing.png "tensorflow_on_the_fly_processing")

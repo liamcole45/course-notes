@@ -833,3 +833,50 @@ tensorflow_on_the_fly_processing
 
 ### TensorFlow on the fly data processing pipeline
 ![tensorflow_on_the_fly_processing](../pictures/tensorflow_on_the_fly_processing.png "tensorflow_on_the_fly_processing")
+
+### tftransform.ipynb
+
+[tftransform.ipynb](./tftransform.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive/11_taxifeateng/tftransform.ipynb)
+1. Adding day of week at row level in BigQuery
+```
+    WITH daynames AS
+    (SELECT ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'] AS daysofweek)
+    SELECT
+    (tolls_amount + fare_amount) AS fare_amount,
+    daysofweek[ORDINAL(EXTRACT(DAYOFWEEK FROM pickup_datetime))] AS dayofweek,
+    EXTRACT(HOUR FROM pickup_datetime) AS hourofday,
+    pickup_longitude AS pickuplon,
+    pickup_latitude AS pickuplat,
+    dropoff_longitude AS dropofflon,
+    dropoff_latitude AS dropofflat,
+    passenger_count AS passengers,
+    FROM
+    `nyc-tlc.yellow.trips`, daynames
+    WHERE
+    trip_distance > 0 AND fare_amount > 0
+    limit 100
+```
+
+### Notes from Readings
+1. Preprocessing function [example](https://www.tensorflow.org/tfx/transform/get_started) `tf.transform`
+```
+import tensorflow as tf
+import tensorflow_transform as tft
+import tensorflow_transform.beam as tft_beam
+
+def preprocessing_fn(inputs):
+  x = inputs['x']
+  y = inputs['y']
+  s = inputs['s']
+  x_centered = x - tft.mean(x)
+  y_normalized = tft.scale_to_0_1(y)
+  s_integerized = tft.compute_and_apply_vocabulary(s)
+  x_centered_times_y_normalized = x_centered * y_normalized
+  return {
+      'x_centered': x_centered,
+      'y_normalized': y_normalized,
+      'x_centered_times_y_normalized': x_centered_times_y_normalized,
+      's_integerized': s_integerized
+  }
+```

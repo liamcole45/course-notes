@@ -48,3 +48,78 @@ Information about learning curves below have been obtained from [here](https://m
 
 #### goodfit
 ![goodfit](../pictures/goodfit.png "goodfit")
+
+
+### learning_rate.ipynb
+
+[learning_rate.ipynb](./learning_rate.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/art_and_science_of_ml/labs/learning_rate.ipynb)
+
+## Introduction 
+
+In this notebook, you will observe learning curve change. You will use the Keras Sequential Model to build an ML model to predict housing prices.
+
+A learning curve is a plot of model learning performance over experience or time.
+
+Learning curves are a widely used diagnostic tool in machine learning for algorithms that learn from a training dataset incrementally. The model can be evaluated on the training dataset and on a hold out validation dataset after each update during training and plots of the measured performance can created to show learning curves. Reviewing learning curves of models during training can be used to diagnose problems with learning, such as an underfit or overfit model, as well as whether the training and validation datasets are suitably representative.
+
+Adam is an optimization algorithm that can be used instead of the classical stochastic gradient descent procedure to update network weights iterative based in training data. [How to use Learning Curves to Diagnose Machine Learning Model Performance](https://machinelearningmastery.com/learning-curves-for-diagnosing-machine-learning-model-performance/#:~:text=A%20learning%20curve%20is%20a,from%20a%20training%20dataset%20incrementally.&text=Learning%20curves%20are%20plots%20that,time%20in%20terms%20of%20experience).
+
+1. Copying from cloud storage to juypter notebook directory
+```
+!gsutil cp gs://cloud-training-demos/feat_eng/housing/housing_pre-proc.csv ../data
+```
+2. Training, validation, test data split
+```
+train, test = train_test_split(housing_df, test_size=0.2)
+train, val = train_test_split(train, test_size=0.2)
+
+print(len(train), 'train examples')
+print(len(val), 'validation examples')
+print(len(test), 'test examples')
+
+train.to_csv('../data/housing-train.csv', encoding='utf-8', index=False)
+val.to_csv('../data/housing-val.csv', encoding='utf-8', index=False)
+test.to_csv('../data/housing-test.csv', encoding='utf-8', index=False)
+```
+3. Create, compile and fit keras sequential model
+```
+# Model create
+
+feature_layer = tf.keras.layers.DenseFeatures(feature_columns, dtype = 'float64')
+
+model = tf.keras.Sequential([
+    feature_layer,
+    layers.Dense(12, input_dim = 8, activation = 'relu'),
+    layers.Dense(8, activation = 'relu'),
+    layers.Dense(1, activation = 'linear', name = 'median_house_value')
+])
+
+# Model compile
+opt = keras.optimizers.Adam(learning_rate = 0.5)
+model.compile(optimizer = opt,
+             loss = 'mse',
+             metrics = ['mse'])
+
+# Model Fit
+history = model.fit(train_ds,
+                    validation_data=val_ds,
+                    epochs=32)
+```
+4. Plotting Loss curves `important`
+```
+def plot_curves(history, metrics):
+    nrows = 1
+    ncols = 2
+    fig = plt.figure(figsize=(10, 5))
+
+    for idx, key in enumerate(metrics):  
+        ax = fig.add_subplot(nrows, ncols, idx+1)
+        plt.plot(history.history[key])
+        plt.plot(history.history['val_{}'.format(key)])
+        plt.title('model {}'.format(key))
+        plt.ylabel(key)
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left'); 
+plot_curves(history, ['loss', 'mse'])
+```

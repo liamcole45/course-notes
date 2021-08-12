@@ -123,3 +123,64 @@ def plot_curves(history, metrics):
         plt.legend(['train', 'validation'], loc='upper left'); 
 plot_curves(history, ['loss', 'mse'])
 ```
+
+### export_data_from_bq_to_gcs.ipynb
+
+[export_data_from_bq_to_gcs.ipynb](./export_data_from_bq_to_gcs.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/art_and_science_of_ml/labs/export_data_from_bq_to_gcs.ipynb)
+
+1. Create cloud bucket using gsutils
+```
+gsutil mb gs://me_oh_my_i_enjoyed_that
+```
+2. Creating `BigQuery` dataset using python
+```
+bq = bigquery.Client(project = PROJECT)
+dataset = bigquery.Dataset(bq.dataset("taxifare"))
+
+try:
+    bq.create_dataset(dataset)
+    print("Dataset created")
+except:
+    print("Dataset already exists")
+```
+3. Splitting data set in `BigQuery` using `ABS(MOD(FARM_FINGERPRINT()`
+```
+Original dataset size = 1,075,800,87
+
+Training Dataset Size = 1,094,492
+ABS(MOD(FARM_FINGERPRINT(CAST(pickup_datetime AS STRING)), 1000)) = 1
+
+Make the validation dataset be 1/10 the size of the training dataset
+Validation Dataset Size = 108,047
+WHERE ABS(MOD(FARM_FINGERPRINT(CAST(pickup_datetime AS STRING)), 10000)) = 2
+```
+3. Using `bash` to export the `BigQuery` tables as CSV files
+```
+%%bash
+
+echo "Deleting current contents of $OUTDIR"
+gsutil -m -q rm -rf $OUTDIR
+
+echo "Extracting training data to $OUTDIR"
+bq --location=US extract \
+   --destination_format CSV  \
+   --field_delimiter "," --noprint_header \
+   taxifare.feateng_training_data \
+   $OUTDIR/taxi-train-*.csv
+
+echo "Extracting validation data to $OUTDIR"
+bq --location=US extract \
+   --destination_format CSV  \
+   --field_delimiter "," --noprint_header \
+   taxifare.feateng_valid_data \
+   $OUTDIR/taxi-valid-*.csv
+
+gsutil ls -l $OUTDIR
+```
+
+then to check on them
+
+```
+!gsutil cat gs://$BUCKET/taxifare/data/taxi-train-000000000000.csv | head -2
+```

@@ -1,0 +1,158 @@
+{
+    "completedTrialCount": "10",
+    "trials": [
+      {
+        "trialId": "7",
+        "hyperparameters": {
+          "batch_size": "15",
+          "lr": "0.033517024801106965",
+          "nbuckets": "11"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 8.741802215576172
+        },
+        "startTime": "2021-08-13T22:30:35.106518391Z",
+        "endTime": "2021-08-13T22:40:35Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "4",
+        "hyperparameters": {
+          "batch_size": "30",
+          "lr": "0.052444509800593009",
+          "nbuckets": "11"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 9.523736953735352
+        },
+        "startTime": "2021-08-13T22:10:46.232803908Z",
+        "endTime": "2021-08-13T22:19:55Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "10",
+        "hyperparameters": {
+          "batch_size": "15",
+          "lr": "0.024552101449617773",
+          "nbuckets": "10"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 10.062378883361816
+        },
+        "startTime": "2021-08-13T22:42:00.158223014Z",
+        "endTime": "2021-08-13T22:52:01Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "5",
+        "hyperparameters": {
+          "batch_size": "30",
+          "lr": "0.099999999999999978",
+          "nbuckets": "10"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 11.164623260498047
+        },
+        "startTime": "2021-08-13T22:20:39.821369295Z",
+        "endTime": "2021-08-13T22:30:00Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "2",
+        "hyperparameters": {
+          "batch_size": "15",
+          "lr": "0.0096797412784403476",
+          "nbuckets": "14"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 12.49499225616455
+        },
+        "startTime": "2021-08-13T21:58:50.016605607Z",
+        "endTime": "2021-08-13T22:09:55Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "1",
+        "hyperparameters": {
+          "batch_size": "30",
+          "lr": "0.003162277660168379",
+          "nbuckets": "18"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 12.820863723754883
+        },
+        "startTime": "2021-08-13T21:58:50.016442176Z",
+        "endTime": "2021-08-13T22:08:26Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "3",
+        "hyperparameters": {
+          "batch_size": "30",
+          "lr": "0.00064655636724005548",
+          "nbuckets": "21"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 13.102740287780762
+        },
+        "startTime": "2021-08-13T22:10:10.308725407Z",
+        "endTime": "2021-08-13T22:20:11Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "8",
+        "hyperparameters": {
+          "batch_size": "15",
+          "lr": "0.034956170821080233",
+          "nbuckets": "12"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 16.88875389099121
+        },
+        "startTime": "2021-08-13T22:30:36.617819052Z",
+        "endTime": "2021-08-13T22:40:45Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "9",
+        "hyperparameters": {
+          "batch_size": "15",
+          "lr": "0.073449123312510162",
+          "nbuckets": "11"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 17.581653594970703
+        },
+        "startTime": "2021-08-13T22:42:00.158027284Z",
+        "endTime": "2021-08-13T22:51:59Z",
+        "state": "SUCCEEDED"
+      },
+      {
+        "trialId": "6",
+        "hyperparameters": {
+          "batch_size": "50",
+          "lr": "0.031606158189941724",
+          "nbuckets": "10"
+        },
+        "finalMetric": {
+          "trainingStep": "10",
+          "objectiveValue": 27.94313621520996
+        },
+        "startTime": "2021-08-13T22:20:41.321986882Z",
+        "endTime": "2021-08-13T22:29:32Z",
+        "state": "SUCCEEDED"
+      }
+    ],
+    "consumedMLUnits": 0.64,
+    "isHyperparameterTuningJob": true,
+    "hyperparameterMetricTag": "rmse"
+  }

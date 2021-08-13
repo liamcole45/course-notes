@@ -356,3 +356,11 @@ gcloud ai-platform jobs submit training $JOBID \
     --lr $LR \
     --nnsize $NNSIZE
 ```
+8. Hyperparameter training job results in `AI Platform` service
+Training Output Display and json file ([training_input.json](./training_input.json) and [training_output.json](.//training_output.json))
+![training_output_json.png](../pictures/training_output_json.png "training_output_json")
+Display of graph outputs
+![hyperparameter_tuning_job_001](../pictures/hyperparameter_tuning_job_001.png "hyperparameter_tuning_job_001")
+![hyperparameter_tuning_job_002](../pictures/hyperparameter_tuning_job_002.png "hyperparameter_tuning_job_002")
+Other services mentioned but were blank
+![other_services_were_blank](../pictures/other_services_were_blank.png "other_services_were_blank")

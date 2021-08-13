@@ -184,3 +184,172 @@ then to check on them
 ```
 !gsutil cat gs://$BUCKET/taxifare/data/taxi-train-000000000000.csv | head -2
 ```
+
+### hyperparameter_tuning.ipynb
+
+[hyperparameter_tuning.ipynb](./hyperparameter_tuning.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/art_and_science_of_ml/labs/hyperparameter_tuning.ipynb)
+
+# Performing the Hyperparameter tuning
+
+**Learning Objectives**
+1. Learn how to use `cloudml-hypertune` to report the results for Cloud hyperparameter tuning trial runs
+2. Learn how to configure the `.yaml` file for submitting a Cloud hyperparameter tuning job
+3. Submit a hyperparameter tuning job to Cloud AI Platform
+
+## Introduction
+
+Let's see if we can improve upon that by tuning our hyperparameters.
+
+Hyperparameters are parameters that are set *prior* to training a model, as opposed to parameters which are learned *during* training. 
+
+These include learning rate and batch size, but also model design parameters such as type of activation function and number of hidden units.
+
+Here are the four most common ways to finding the ideal hyperparameters:
+1. Manual
+2. Grid Search
+3. Random Search
+4. Bayesian Optimzation
+
+**1. Manual**
+
+Traditionally, hyperparameter tuning is a manual trial and error process. A data scientist has some intution about suitable hyperparameters which they use as a starting point, then they observe the result and use that information to try a new set of hyperparameters to try to beat the existing performance. 
+
+Pros
+- Educational, builds up your intuition as a data scientist
+- Inexpensive because only one trial is conducted at a time
+
+Cons
+- Requires alot of time and patience
+
+**2. Grid Search**
+
+On the other extreme we can use grid search. Define a discrete set of values to try for each hyperparameter then try every possible combination. 
+
+Pros
+- Can run hundreds of trials in parallel using the cloud
+- Gauranteed to find the best solution within the search space
+
+Cons
+- Expensive
+
+**3. Random Search**
+
+Alternatively define a range for each hyperparamter (e.g. 0-256) and sample uniformly at random from that range. 
+
+Pros
+- Can run hundreds of trials in parallel using the cloud
+- Requires less trials than Grid Search to find a good solution
+
+Cons
+- Expensive (but less so than Grid Search)
+
+**4. Bayesian Optimization**
+
+Unlike Grid Search and Random Search, Bayesian Optimization takes into account information from  past trials to select parameters for future trials. The details of how this is done is beyond the scope of this notebook, but if you're interested you can read how it works here [here](https://cloud.google.com/blog/products/gcp/hyperparameter-tuning-cloud-machine-learning-engine-using-bayesian-optimization). 
+
+Pros
+- Picks values intelligenty based on results from past trials
+- Less expensive because requires fewer trials to get a good result
+
+Cons
+- Requires sequential trials for best results, takes longer
+
+**AI Platform HyperTune**
+
+AI Platform HyperTune, powered by [Google Vizier](https://ai.google/research/pubs/pub46180), uses Bayesian Optimization by default, but [also supports](https://cloud.google.com/ml-engine/docs/tensorflow/hyperparameter-tuning-overview#search_algorithms) Grid Search and Random Search. 
+
+
+When tuning just a few hyperparameters (say less than 4), Grid Search and Random Search work well, but when tunining several hyperparameters and the search space is large Bayesian Optimization is best.
+
+1. It will list all the files in the mentioned directory with a long listing format
+```
+!ls -la taxifare/trainer
+```
+
+2. To use hyperparameter tuning in your training job you must perform the following steps:
+
+ - Specify the hyperparameter tuning configuration for your training job by including a HyperparameterSpec in your TrainingInput object.
+
+ - Include the following code in your training application:
+  - Parse the command-line arguments representing the hyperparameters you want to tune, and use the values to set the hyperparameters for your training trial. 
+  - Add your hyperparameter metric to the summary for your graph.
+  - To submit a hyperparameter tuning job, we must modify `model.py` and `task.py` to expose any variables we want to tune as command line arguments.
+
+3. How to write files from `python` using notebook `magic` bash command
+```
+%%writefile taxifare/trainer/task.py
+```
+
+4. ### Create config.yaml file
+
+Specify the hyperparameter tuning configuration for your training job
+Create a HyperparameterSpec object to hold the hyperparameter tuning configuration for your training job, and add the HyperparameterSpec as the hyperparameters object in your TrainingInput object.
+
+In your HyperparameterSpec, set the hyperparameterMetricTag to a value representing your chosen metric. If you don't specify a hyperparameterMetricTag, AI Platform Training looks for a metric with the name training/hptuning/metric. The following example shows how to create a configuration for a metric named metric1:
+
+5. #### Report your hyperparameter metric to AI Platform Training
+
+The way to report your hyperparameter metric to the AI Platform Training service depends on whether you are using TensorFlow for training or not. It also depends on whether you are using a runtime version or a custom container for training.
+
+We recommend that your training code reports your hyperparameter metric to AI Platform Training frequently in order to take advantage of early stopping.
+
+TensorFlow with a runtime version
+If you use an AI Platform Training runtime version and train with TensorFlow, then you can report your hyperparameter metric to AI Platform Training by writing the metric to a TensorFlow summary. Use one of the following functions.
+
+You may need to install `cloudml-hypertune` on your machine to run this code locally.
+
+6. Installing latest verion of `cloudml-hypertune`
+```
+!pip install cloudml-hypertune
+```
+
+7. The below hyperparameter training job step will take **upto 45 minutes** to complete.
+```
+%%bash
+
+PROJECT_ID=$(gcloud config list project --format "value(core.project)")
+BUCKET=$BUCKET
+REGION="us-central1"
+TFVERSION="2.4"
+
+# Output directory and jobID
+OUTDIR=gs://${BUCKET}/taxifare/trained_model_$(date -u +%y%m%d_%H%M%S)
+JOBID=taxifare_$(date -u +%y%m%d_%H%M%S)
+echo ${OUTDIR} ${REGION} ${JOBID}
+gsutil -m rm -rf ${OUTDIR}
+
+# Model and training hyperparameters
+BATCH_SIZE=15
+NUM_EXAMPLES_TO_TRAIN_ON=100
+NUM_EVALS=10
+NBUCKETS=10
+LR=0.001
+NNSIZE="32 8"
+
+# GCS paths
+GCS_PROJECT_PATH=gs://$BUCKET/taxifare
+DATA_PATH=$GCS_PROJECT_PATH/data
+TRAIN_DATA_PATH=$DATA_PATH/taxi-train*
+EVAL_DATA_PATH=$DATA_PATH/taxi-valid*
+
+# TODO 3
+gcloud ai-platform jobs submit training $JOBID \
+    --module-name=trainer.task \
+    --package-path=taxifare/trainer \
+    --staging-bucket=gs://${BUCKET} \
+    --config=hptuning_config.yaml \
+    --python-version=3.7 \
+    --runtime-version=${TFVERSION} \
+    --region=${REGION} \
+    -- \
+    --eval_data_path $EVAL_DATA_PATH \
+    --output_dir $OUTDIR \
+    --train_data_path $TRAIN_DATA_PATH \
+    --batch_size $BATCH_SIZE \
+    --num_examples_to_train_on $NUM_EXAMPLES_TO_TRAIN_ON \
+    --num_evals $NUM_EVALS \
+    --nbuckets $NBUCKETS \
+    --lr $LR \
+    --nnsize $NNSIZE
+```

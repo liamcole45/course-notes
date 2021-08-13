@@ -192,6 +192,9 @@ Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-anal
 
 # Performing the Hyperparameter tuning
 
+- [Google Documentation Link](https://cloud.google.com/ai-platform/training/docs/hyperparameter-tuning-overview)
+- Easier notebook to [follow](https://www.kaggle.com/tboyle10/hyperparameter-tuning) from the [3rd reading](../readings/file-resources-readings-3-en.pdf) 
+
 **Learning Objectives**
 1. Learn how to use `cloudml-hypertune` to report the results for Cloud hyperparameter tuning trial runs
 2. Learn how to configure the `.yaml` file for submitting a Cloud hyperparameter tuning job

@@ -651,3 +651,10 @@ gcloud ai-platform jobs submit training $JOBID \
     --lr $LR \
     --nnsize $NNSIZE 
 ```
+
+## Notes from Week 3 Lectures and Readings
+![data_driven_embeddings](../pictures/data_driven_embeddings.png "data_driven_embeddings")
+
+![dropout_layers_are_a_form_of_regularisation](../pictures/dropout_layers_are_a_form_of_regularisation.png "dropout_layers_are_a_form_of_regularisation")
+
+![how_to_design_a_neural_network](../pictures/how_to_design_a_neural_network.png "how_to_design_a_neural_network")

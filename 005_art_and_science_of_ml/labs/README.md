@@ -510,3 +510,144 @@ model.predict({
     'passenger_count': tf.convert_to_tensor([3.0]),    
 }, steps=1)
 ```
+
+### training_models_at_scale.ipynb
+
+[training_models_at_scale.ipynb](./training_models_at_scale.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/art_and_science_of_ml/labs/training_models_at_scale.ipynb)
+
+1. ## Training Models at Scale with AI Platform
+**Learning Objectives:**
+  1. Learn how to organize your training code into a Python package
+  1. Train your model using cloud infrastructure via Google Cloud AI Platform Training Service
+  1. (optional) Learn how to run your training package using Docker containers and push training Docker images on a Docker registry
+
+## Introduction
+
+In this notebook we'll make the jump from training locally, to do training in the cloud. We'll take advantage of Google Cloud's [AI Platform Training Service](https://cloud.google.com/ai-platform/docs). 
+
+AI Platform Training Service is a managed service that allows the training and deployment of ML models without having to provision or maintain servers. The infrastructure is handled seamlessly by the managed service for us.
+
+1. Export the tables as CSV files
+```
+%%bash
+
+echo "Deleting current contents of $OUTDIR"
+gsutil -m -q rm -rf $OUTDIR
+
+echo "Extracting training data to $OUTDIR"
+bq --location=US extract \
+   --destination_format CSV  \
+   --field_delimiter "," --noprint_header \
+   taxifare.feateng_training_data \
+   $OUTDIR/taxi-train-*.csv
+
+echo "Extracting validation data to $OUTDIR"
+bq --location=US extract \
+   --destination_format CSV  \
+   --field_delimiter "," --noprint_header \
+   taxifare.feateng_valid_data \
+   $OUTDIR/taxi-valid-*.csv
+
+gsutil ls -l $OUTDIR
+```
+2. ### Move code into a python package
+
+
+The first thing to do is to convert your training code snippets into a regular Python package that we will then `pip install` into the Docker container. 
+
+**A Python package is simply a collection of one or more `.py` files along with an `__init__.py` file to identify the containing directory as a package. The `__init__.py` sometimes contains initialization code but for our purposes an empty file suffices.**
+
+**Lab Task #1**: Organizing your training code into a Python package
+
+There are two places to fill in TODOs in `model.py`. 
+
+ * in the `build_dnn_model` function, add code to use a optimizer with a custom learning rate.
+ * in the `train_and_evaluate` function, add code to define variables using the `hparams` dictionary.
+
+How to write out Juypter cells to bash
+```
+%%writefile ./taxifare/trainer/model.py
+import datetime
+import logging
+import os
+import shutil
+```
+
+3. ### Run trainer module package locally before sending job to cloud
+
+Now we can test our training code locally as follows using the local test data. We'll run a very small training job over a single file with a small batch size and one eval step.
+
+```
+%%bash
+
+EVAL_DATA_PATH=./taxifare/tests/data/taxi-valid*
+TRAIN_DATA_PATH=./taxifare/tests/data/taxi-train*
+OUTPUT_DIR=./taxifare-model
+
+test ${OUTPUT_DIR} && rm -rf ${OUTPUT_DIR}
+export PYTHONPATH=${PYTHONPATH}:${PWD}/taxifare
+    
+python3 -m trainer.task \
+--eval_data_path $EVAL_DATA_PATH \
+--output_dir $OUTPUT_DIR \
+--train_data_path $TRAIN_DATA_PATH \
+--batch_size 5 \
+--num_examples_to_train_on 100 \
+--num_evals 1 \
+--nbuckets 10 \
+--lr 0.001 \
+--nnsize 32 8
+```
+
+4. ### Run your training package on Cloud AI Platform
+
+Once the code works in standalone mode locally, you can run it on Cloud AI Platform. To submit to the Cloud we use [`gcloud ai-platform jobs submit training [jobname]`](https://cloud.google.com/sdk/gcloud/reference/ml-engine/jobs/submit/training) and simply specify some additional parameters for AI Platform Training Service:
+- jobid: A unique identifier for the Cloud job. We usually append system time to ensure uniqueness
+- region: Cloud region to train in. See [here](https://cloud.google.com/ml-engine/docs/tensorflow/regions) for supported AI Platform Training Service regions
+
+The arguments before `-- \` are for AI Platform Training Service.
+The arguments after `-- \` are sent to our `task.py`.
+
+Because this is on the entire dataset, it will take a while. You can monitor the job from the GCP console in the Cloud AI Platform section.
+
+```
+%%bash
+# Output directory and jobID
+OUTDIR=gs://${BUCKET}/taxifare/trained_model_$(date -u +%y%m%d_%H%M%S)
+JOBID=taxifare_$(date -u +%y%m%d_%H%M%S)
+echo ${OUTDIR} ${REGION} ${JOBID}
+gsutil -m rm -rf ${OUTDIR}
+
+# Model and training hyperparameters
+BATCH_SIZE=50
+NUM_EXAMPLES_TO_TRAIN_ON=100
+NUM_EVALS=100
+NBUCKETS=10
+LR=0.001
+NNSIZE="32 8"
+
+# GCS paths
+GCS_PROJECT_PATH=gs://$BUCKET/taxifare
+DATA_PATH=$GCS_PROJECT_PATH/data
+TRAIN_DATA_PATH=$DATA_PATH/taxi-train*
+EVAL_DATA_PATH=$DATA_PATH/taxi-valid*
+
+gcloud ai-platform jobs submit training $JOBID \
+    --module-name=trainer.task \
+    --package-path=taxifare/trainer \
+    --staging-bucket=gs://${BUCKET} \
+    --python-version=3.7 \
+    --runtime-version=${TFVERSION} \
+    --region=${REGION} \
+    -- \
+    --eval_data_path $EVAL_DATA_PATH \
+    --output_dir $OUTDIR \
+    --train_data_path $TRAIN_DATA_PATH \
+    --batch_size $BATCH_SIZE \
+    --num_examples_to_train_on $NUM_EXAMPLES_TO_TRAIN_ON \
+    --num_evals $NUM_EVALS \
+    --nbuckets $NBUCKETS \
+    --lr $LR \
+    --nnsize $NNSIZE 
+```

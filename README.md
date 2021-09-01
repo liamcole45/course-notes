@@ -13,6 +13,8 @@ Completed in this order
 - [002_launching-machine-learning/labs](./002_launching-machine-learning/labs) Link to course [here](https://www.coursera.org/learn/launching-machine-learning)
 - [003_intro-to-tensorflow/labs](./003_intro-to-tensorflow/labs) Link to course [here](https://www.coursera.org/learn/intro-tensorflow)
 - [004_feature-engineering/labs](./004_feature-engineering/labs) Link to course [here](https://www.coursera.org/learn/feature-engineering)
+- [005_art_and_science_of_ml](./005_art_and_science_of_ml) Link to course [here](https://www.coursera.org/learn/art-science-ml)
+- [006_big_data_ml_fundamentals](./006_big_data_ml_fundamentals) Link to course [here](https://www.coursera.org/learn/gcp-big-data-ml-fundamentals)
 
 ### Keys
-- `liam-functions` - handy functions i've found useful and will seperate out later (maybe in make into package if there is enough)
+- `liam-functions` - handy functions i'll try summarise separately at a later date)

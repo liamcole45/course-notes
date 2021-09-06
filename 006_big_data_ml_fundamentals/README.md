@@ -8,7 +8,7 @@
 
 ### Predicting Visitor Purchases with a Classification Model with BigQuery ML
 
-Found [here](https://www.qwiklabs.com/focuses/1794?parent=catalog)
+Lab found [here](https://www.qwiklabs.com/focuses/1794?parent=catalog)
 
 **Select your performance criteria**
 
@@ -384,3 +384,40 @@ SELECT
 ORDER BY
   predicted_will_buy_on_return_visit DESC;
 ```
+
+### Creating a Streaming Data Pipeline for a Real-Time Dashboard with Dataflow
+
+Lab found [here](https://googlecoursera.qwiklabs.com/focuses/17558103?parent=lti_session) (link may not work, not sure why)
+
+1. **Pub/Sub Topic to BigQuery**
+
+- Input Pub/Sub topic, enter `projects/pubsub-public-data/topics/taxirides-realtime`
+- BQ Schema created here:
+```
+bq mk taxirides
+```
+```
+bq mk \
+--time_partitioning_field timestamp \
+--schema ride_id:string,point_idx:integer,latitude:float,longitude:float,\
+timestamp:timestamp,meter_reading:float,meter_increment:float,ride_status:string,\
+passenger_count:integer -t taxirides.realtime
+```
+- BigQuery output table, enter `<myprojectid>:taxirides.realtime`
+- Under Temporary location, enter `gs://<mybucket>/tmp/`
+
+2. **DataStudio Tip**  `datastudio.google.com`
+
+- Using `row_number` to use as a `dashboard_sort`
+```
+SELECT
+ ROW_NUMBER() OVER() AS dashboard_sort,
+ minute,
+```
+Example:
+- Chart type: Combo chart
+- Date range Dimension: dashboard_sort
+- Dimension: dashboard_sort
+- **Drill Down: dashboard_sort (Make sure that Drill down option is turned ON)**
+- Metric: SUM() total_rides, SUM() total_passengers, SUM() total_revenue
+- Sort: dashboard_sort, Ascending (latest rides first)

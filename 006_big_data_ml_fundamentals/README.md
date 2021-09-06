@@ -421,3 +421,9 @@ Example:
 - **Drill Down: dashboard_sort (Make sure that Drill down option is turned ON)**
 - Metric: SUM() total_rides, SUM() total_passengers, SUM() total_revenue
 - Sort: dashboard_sort, Ascending (latest rides first)
+
+### Simple Neural Network Diagram
+<img src="./pictures/simple_neural_network_diagram.png" alt="drawing" width="400"/>
+
+### AutoML Vision vs Vision Api
+<img src="./pictures/automl_vision_vs_vision_api.png" alt="drawing" width="400"/>

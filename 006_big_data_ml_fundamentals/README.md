@@ -427,3 +427,31 @@ Example:
 
 ### AutoML Vision vs Vision Api
 <img src="./pictures/automl_vision_vs_vision_api.png" alt="drawing" width="400"/>
+
+## Classifying Images of Clouds in the Cloud with AutoML Vision 
+
+Lab found [here](https://googlecoursera.qwiklabs.com/focuses/17592422?parent=lti_session) (link may not work, not sure why)
+
+**Note:** If you were building a production model, you'd want at least 100 images per label to ensure high accuracy. This is just a demo so only 20 images of each type were used so the model could train quickly
+
+1. A simple, repeatable way to do this is to use the hash of a well-distributed column in our data (See https://www.oreilly.com/learning/repeatable-sampling-of-data-sets-in-bigquery-for-machine-learning).
+
+Below we can see that roughly 75% of the data is used for training, and 25% for evaluation.
+
+```
+traindf = bq.query(query + " AND ABS(MOD(FARM_FINGERPRINT(title), 4)) > 0").to_dataframe()
+evaldf  = bq.query(query + " AND ABS(MOD(FARM_FINGERPRINT(title), 4)) = 0").to_dataframe()
+```
+We can also see that within each dataset, the classes are roughly balanced.
+```
+traindf['source'].value_counts()
+```
+```
+evaldf['source'].value_counts()
+```
+
+## Lecture Notes Course Summary
+
+<img src="./pictures/gcp_data_pipeline.png" alt="drawing" width="500"/>
+
+<img src="./pictures/data_pipeline_challenges.png" alt="drawing" width="400"/>

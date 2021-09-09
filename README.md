@@ -15,6 +15,7 @@ Completed in this order
 - [004_feature-engineering/labs](./004_feature-engineering/labs) Link to course [here](https://www.coursera.org/learn/feature-engineering)
 - [005_art_and_science_of_ml](./005_art_and_science_of_ml) Link to course [here](https://www.coursera.org/learn/art-science-ml)
 - [006_big_data_ml_fundamentals](./006_big_data_ml_fundamentals) Link to course [here](https://www.coursera.org/learn/gcp-big-data-ml-fundamentals)
+- [007_production_ml_systems](./007_production_ml_systems) Link to course [here](https://www.coursera.org/learn/gcp-production-ml-systems)
 
 ### Keys
 - `liam-functions` - handy functions i'll try summarise separately at a later date)

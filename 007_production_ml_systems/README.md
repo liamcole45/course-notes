@@ -75,3 +75,15 @@ In this section, you fix the code in BabyweightMLService.java and test it with t
 `BabyweightMLService.java` [file](./labs/BabyweightMLService.java) and [URL](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/1074f954d44a6d65eb28069bba135b184eec14ac/courses/machine_learning/deepdive/06_structured/labs/serving/pipeline/src/main/java/com/google/cloud/training/mlongcp/BabyweightMLService.java)
 
 <img src="./pictures/batch_vs_streaming_diagram.png" alt="drawing" width="400"/>
+
+**Conclusion**
+So there you have it, our solution for mitigating training serving skew through code. We mitigated this problem by using polymorphism. Implementing the parts of the pipeline that don't change within a single parent class called InputOutput.java and then implementing the parts of the code that do need to change in separate child classes which were enforced via a contract in the parent class
+
+### Tensorflow Records (TFRecords)
+Apache Beam
+
+<img src="./pictures/tfrecords_beam.png" alt="drawing" width="400"/>
+
+Apache Spark
+
+<img src="./pictures/tfrecords_spark.png" alt="drawing" width="400"/>

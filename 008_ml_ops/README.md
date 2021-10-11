@@ -69,3 +69,9 @@ gcloud builds submit --config cloudbuild.yaml .
 
 ### Kubernetes Control Plane
 <img src="./pictures/kubernetes_control_plane.png" alt="drawing" width="600"/>
+
+### GKE Zonal vs Regional Cluster
+<img src="./pictures/zonal_vs_regional_cluster.png" alt="drawing" width="600"/>
+
+### GKE Private Cluster
+<img src="./pictures/private_cluster.png" alt="drawing" width="400"/>

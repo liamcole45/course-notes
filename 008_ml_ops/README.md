@@ -75,3 +75,35 @@ gcloud builds submit --config cloudbuild.yaml .
 
 ### GKE Private Cluster
 <img src="./pictures/private_cluster.png" alt="drawing" width="400"/>
+
+### Ways to create deployments
+Describe Deployment Command/Linux
+
+<img src="./pictures/describe_deployment.png" alt="drawing" width="400"/>
+
+Deployment Config Output Command/Linux
+
+<img src="./pictures/output_deployment_config.png" alt="drawing" width="400"/>
+
+Autoscaling
+
+<img src="./pictures/Autoscaling.png" alt="drawing" width="400"/>
+
+
+### AI Platform Pipelines
+
+Tech stack
+
+<img src="./pictures/ai_platforms_tech_stack.png" alt="drawing" width="400"/>
+
+Implementation Strategy
+
+<img src="./pictures/ai_platforms_implementation_strategy.png" alt="drawing" width="400"/>
+
+Instance
+
+<img src="./pictures/ai_platforms_instance.png" alt="drawing" width="400"/>
+
+Power of Reusable Pipelines
+
+<img src="./pictures/power_of_reusable_pipelines.png" alt="drawing" width="400"/>

@@ -208,7 +208,7 @@ git clone https://github.com/GoogleCloudPlatform/mlops-on-gcp
 
 
 ### Notebook Location
-[lab-01.ipyn](./labs/lab-01.ipynb)
+[lab-01.ipynb](./labs/lab-01.ipynb)
 Downloaded from [here](https://github.com/GoogleCloudPlatform/mlops-on-gcp/blob/master/on_demand/kfp-caip-sklearn/lab-01-caip-containers/exercises/lab-01.ipynb)
 
 - **In this lab you learned how to develop a training application, package it as a Docker image, and run it on AI Platform Training.**
@@ -227,3 +227,99 @@ Learning Objectives:
 Scikit-learn is one of the most useful libraries for machine learning in Python. The training code uses scikit-learn for data pre-processing and modeling.
 
 The code is instrumented using the `hypertune` package so it can be used with AI Platform hyperparameter tuning job in searching for the best combination of hyperparameter values by optimizing the metrics you specified.
+
+## Kubeflow Components
+Lecture diagrams
+
+### ML Devops
+<img src="./pictures/ml_devops.png" alt="drawing" width="600"/>
+
+### Kubeflow Dag
+<img src="./pictures/kfp_dag.png" alt="drawing" width="600"/>
+
+### Defining Dag
+<img src="./pictures/defining_dag.png" alt="drawing" width="600"/>
+
+## 1st Main Type of Kubeflow Pipeline - Prebuilt Components
+
+`component.yaml`
+
+<img src="./pictures/component_yaml.png" alt="drawing" width="600"/>
+
+Loading Prebuild Components
+<img src="./pictures/loading_prebuild_components.png" alt="drawing" width="600"/>
+
+Component `bigquery/query`
+<img src="./pictures/component_bigquery_query.png" alt="drawing" width="600"/>
+
+Component `ml_engine/train`
+<img src="./pictures/component_ml_engine_train.png" alt="drawing" width="600"/>
+
+Component `ml_engine/deploy`
+<img src="./pictures/component_ml_engine_deploy.png" alt="drawing" width="600"/>
+
+Component `hypertuning`
+<img src="./pictures/component_hypertuning.png" alt="drawing" width="600"/>
+
+## 2nd Main Type of Kubeflow Pipeline - Lightweight Python Components
+Wraping Python in Kubeflow
+<img src="./pictures/wraping_python_in_kf.png" alt="drawing" width="600"/>
+
+## 3rd Main Type of Kubeflow Pipeline - Custom Components
+Step 1 - `main.py`
+
+<img src="./pictures/1_main_py.png" alt="drawing" width="600"/>
+
+Step 2 - Package into docker
+<img src="./pictures/2_package_into_docker.png" alt="drawing" width="600"/>
+
+Step 3 - Component description
+<img src="./pictures/3_component_description.png" alt="drawing" width="600"/>
+
+Step 4 - Load component into pipeline
+<img src="./pictures/4_load_component_into_pipeline.png" alt="drawing" width="600"/>
+
+Step 5 - Run pipeline components
+<img src="./pictures/5_run_pipeline_components.png" alt="drawing" width="600"/>
+
+## Compile, upload and run
+
+Step 1 - Build and push base container
+<img src="./pictures/1_build_push_base_container.png" alt="drawing" width="600"/>
+
+Step 2 - Build and push trainer container
+<img src="./pictures/2_build_push_trainer_container.png" alt="drawing" width="600"/>
+
+Step 3 - Compile Kubeflow
+<img src="./pictures/3_compile_kubeflow.png" alt="drawing" width="600"/>
+
+Step 4 - Upload pipeline to Kubeflow cluster
+<img src="./pictures/4_upload_pipeline_to_kf_cluster.png" alt="drawing" width="600"/>
+
+Step 5 - Run pipeline
+<img src="./pictures/5_run_pipeline.png" alt="drawing" width="600"/>
+
+
+
+## Continuous Training Pipeline with Kubeflow Pipeline and Cloud AI Platform
+
+**Learning Objectives:**
+1. Learn how to use Kubeflow Pipeline(KFP) pre-build components (BiqQuery, AI Platform training and predictions)
+1. Learn how to use KFP lightweight python components
+1. Learn how to build a KFP with these components
+1. Learn how to compile, upload, and run a KFP with the command line
+
+
+In this lab, you will build, deploy, and run a KFP pipeline that orchestrates **BigQuery** and **AI Platform** services to train, tune, and deploy a **scikit-learn** model.
+
+Cloning repo in notebook (after setting up Kubeflow pipeline)
+```
+cd home/jupyter/
+git clone https://github.com/GoogleCloudPlatform/mlops-on-gcp
+```
+
+[lab-02.ipynb](./labs/lab-02.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/mlops-on-gcp/blob/72a48faf875f06abe667e3e3bb2eafacc60594c5/on_demand/kfp-caip-sklearn/lab-02-kfp-pipeline/lab-02.ipynb)
+
+In this lab, you learned how to build, deploy, and run a KFP that orchestrates BigQuery and AI Platform services to train, tune, and deploy a Scikit-learn model.
+

@@ -211,7 +211,9 @@ git clone https://github.com/GoogleCloudPlatform/mlops-on-gcp
 [lab-01.ipyn](./labs/lab-01.ipynb)
 Downloaded from [here](https://github.com/GoogleCloudPlatform/mlops-on-gcp/blob/master/on_demand/kfp-caip-sklearn/lab-01-caip-containers/exercises/lab-01.ipynb)
 
-**Really good detail, please refer to Notebook Location to see notes**
+- **In this lab you learned how to develop a training application, package it as a Docker image, and run it on AI Platform Training.**
+- **Really good detail, please refer to Notebook Location to see notes**
+
 
 Using custom containers with AI Platform Training
 Learning Objectives:

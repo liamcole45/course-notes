@@ -323,3 +323,40 @@ Downloaded from [here](https://github.com/GoogleCloudPlatform/mlops-on-gcp/blob/
 
 In this lab, you learned how to build, deploy, and run a KFP that orchestrates BigQuery and AI Platform services to train, tune, and deploy a Scikit-learn model.
 
+
+## Full CI/CD Stack for ML Systems
+<img src="./pictures/full_ci_cd_stack_for_ml_systems.png" alt="drawing" width="600"/>
+
+## Prepackaged configuration actions that are available to you (see Github URL)
+<img src="./pictures/cloud_builder_examples.png" alt="drawing" width="600"/>
+
+# Cloud Builder
+### Example
+<img src="./pictures/cloud_builder_example.png" alt="drawing" width="600"/>
+
+### Custom Example
+<img src="./pictures/custom_cloud_builder_example.png" alt="drawing" width="600"/>
+
+### Cloud Build Config Example
+<img src="./pictures/cloud_build_build_config_example.png" alt="drawing" width="600"/>
+
+### Cloud Build Persistent Directory
+<img src="./pictures/cloud_build_persistence_dir.png" alt="drawing" width="600"/>
+
+### Cloud Build Substitutions Example
+<img src="./pictures/cloud_build_substitutions.png" alt="drawing" width="600"/>
+
+## Lab
+
+In this lab, you develop a Cloud Build CI/CD workflow that automatically builds and deploys a Kubeflow Pipeline (KFP). You also integrate your workflow with GitHub by setting up a trigger that starts the workflow when a new tag is applied to the GitHub repo that hosts the pipeline's code.
+
+Objectives:
+- Create a custom Cloud Build builder to pilot AI Platform Pipelines.
+- Write a Cloud Build config file to build and push all the artifacts for a KFP.
+- Set up a Cloud Build Github trigger to rebuild the KFP.
+
+
+[lab-03.ipynb](./labs/lab-03.ipynb)
+Downloaded from [here](https://github.com/GoogleCloudPlatform/mlops-on-gcp/blob/de86e262cb5a79a201f7c719c3f1b0173cecaf52/on_demand/kfp-caip-sklearn/lab-03-kfp-cicd/lab-03.ipynb)
+
+In this lab, you developed a Cloud Build CI/CD workflow that automatically builds and deploys a Kubeflow Pipeline (KFP). You also integrated your workflow with GitHub by setting up a trigger that starts the workflow when a new tag is applied to the GitHub repo that hosts the pipeline's code.

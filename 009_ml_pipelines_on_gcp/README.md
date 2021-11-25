@@ -74,3 +74,17 @@ Currently, TFMA visualizations do not render properly in JupyterLab. It is recom
 This concludes your introductory walthrough through TFX pipeline components. In the lab, you used TFX to analyze, understand, and pre-process the dataset and train, analyze, validate, and deploy a multi-class classification model to predict the type of forest cover from cartographic features. You utilized a TFX Interactive Context for prototype development of a TFX pipeline directly in a Jupyter notebook. Next, you worked with the TFDV library to modify your dataset schema to add feature constraints to catch data anamolies that can negatively impact your model's performance. You utilized TFT library for feature proprocessing for consistent feature transformations for your model at training and serving time. Lastly, using the TFMA library, you added model performance constraints to ensure you only push more accurate models than previous runs to production.
 
 The next labs in the series will guide through developing a TFX pipeline, deploying and running the pipeline on **AI Platform Pipelines** and automating the pipeline build and deployment processes with **Cloud Build**.
+
+## Pipeline Orchestration with TFX
+<img src="./pictures/why_orchestrate.png" alt="drawing" width="600"/>
+<img src="./pictures/tfx_orchestration_on_a_notebook.png" alt="drawing" width="600"/>
+
+## Apache Beam TFX Relationship 
+<img src="./pictures/apache_beam_scales_tfx.png" alt="drawing" width="600"/>
+<img src="./pictures/how_tfx_uses_beam.png" alt="drawing" width="600"/>
+
+## TFX on Google Cloud
+<img src="./pictures/high_level_of_tfx_on_google_cloud.png" alt="drawing" width="600"/>
+<img src="./pictures/high_level_of_tfx_on_google_cloud_2.png" alt="drawing" width="600"/>
+<img src="./pictures/high_level_of_tfx_on_google_cloud_3.png" alt="drawing" width="600"/>
+<img src="./pictures/high_level_of_tfx_on_google_cloud_4.png" alt="drawing" width="600"/>

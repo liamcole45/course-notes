@@ -88,3 +88,84 @@ The next labs in the series will guide through developing a TFX pipeline, deploy
 <img src="./pictures/high_level_of_tfx_on_google_cloud_2.png" alt="drawing" width="600"/>
 <img src="./pictures/high_level_of_tfx_on_google_cloud_3.png" alt="drawing" width="600"/>
 <img src="./pictures/high_level_of_tfx_on_google_cloud_4.png" alt="drawing" width="600"/>
+
+## TFX on Cloud AI Platform Pipelines 
+[lab-02.ipynb](./labs/lab2/lab-02.ipynb). Need to run this to create files used in this lab
+```
+cd mlops-on-gcp/workshops/tfx-caip-tf23
+./install.sh
+```
+
+In this lab, you learned how to manually build and deploy a TFX pipeline to AI Platform Pipelines and trigger pipeline runs from a notebook
+
+### Overview
+In this lab, you use utilize the following tools and services to deploy and run a TFX pipeline on Google Cloud that automates the development and deployment of a TensorFlow 2.3 WideDeep Classifer to predict forest cover from cartographic data:
+- The TFX CLI utility to build and deploy a TFX pipeline.
+- A hosted AI Platform Pipeline instance (Kubeflow Pipelines) for TFX pipeline orchestration.
+- Dataflow jobs for scalable, distributed data processing for TFX components.
+- A AI Platform Training job for model training and flock management for parallel tuning trials.
+- AI Platform Prediction as a model server destination for blessed pipeline model versions.
+- CloudTuner and AI Platform Vizier for advanced model hyperparameter tuning using the Vizier algorithm.
+- You will then create and monitor pipeline runs using the TFX CLI as well as the KFP UI.
+
+### Objectives
+- Use the TFX CLI to build a TFX pipeline.
+- Deploy a TFX pipeline version without tuning to a hosted AI Platform Pipelines instance.
+- Create and monitor a TFX pipeline run using the TFX CLI.
+- Deploy a new TFX pipeline version with tuning enabled to a hosted AI Platform Pipelines instance.
+- Create and monitor another TFX pipeline run directly in the KFP UI.
+
+## TFX Pipeline Design Pattern
+<img src="./pictures/tfx_pipeline_design_pattern.png" alt="drawing" width="600"/>
+
+## TFX Pipeline as Docker Container
+<img src="./pictures/tfx_pipelines_as_docker_container.png" alt="drawing" width="600"/>
+
+## CI/CD for training TFX Pipelines on Google Cloud
+<img src="./pictures/ci_cd_training_tfx_pipelines_on_google_cloud.png" alt="drawing" width="600"/>
+
+## Pipeline Automation Steps
+### Level 0 - TFX Pipeline Notebook Prototyping
+<img src="./pictures/level_0_tfx_pipeline_notebook_prototyping.png" alt="drawing" width="600"/>
+
+### Level 1 TFX Pipeline Continous Training
+<img src="./pictures/level_1_tfx_pipeline_continous_training.png" alt="drawing" width="600"/>
+
+### Level 2 TFX CI/CD Pipelines
+<img src="./pictures/level_2_ml_development_automation_tfx_ci_cd_pipelines.png" alt="drawing" width="600"/>
+
+### end_to_end_tfx_mlops_workflow
+<img src="./pictures/end_to_end_tfx_mlops_workflow.png" alt="drawing" width="600"/>
+
+### future_developments_feature_store
+<img src="./pictures/future_developments_feature_store.png" alt="drawing" width="600"/>
+
+
+## Git [forks](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
+
+Most commonly, forks are used to either propose changes to someone else's project or to use someone else's project as a starting point for your own idea. You can fork a repository to create a copy of the repository and make changes without affecting the upstream repository. For more information, see "Working with forks."
+Propose changes to someone else's project
+
+For example, you can use forks to propose changes related to fixing a bug. Rather than logging an issue for a bug you've found, you can:
+- Fork the repository.
+- Make the fix.
+- Submit a pull request to the project owner.
+
+## [Building repositories](https://cloud.google.com/build/docs/automating-builds/build-repos-from-github) from GitHub 
+
+GitHub triggers enable you to automatically build on Git pushes and pull requests and view your build results on GitHub and Cloud Console. Additionally, GitHub triggers support all the features supported by the existing GitHub triggers and use the Cloud Build GitHub app to configure and authenticate to GitHub.
+
+This page explains how to create GitHub triggers and build on GitHub using the Cloud Build GitHub app.
+
+## TFX on Cloud AI Platform Pipelines 
+[lab-03.ipynb](./labs/lab-03.ipynb). Need to run this to create files used in this lab
+```
+cd mlops-on-gcp/workshops/tfx-caip-tf23
+./install.sh
+```
+
+Objectives:
+- Develop a CI/CD workflow with Cloud Build to build and deploy a machine learning pipeline.
+- Integrate with Github to trigger workflows with pipeline source repository changes.
+
+In this lab, you walked through authoring a Cloud Build CI/CD workflow that automatically builds and deploys a TFX pipeline. You also integrated your TFX workflow with GitHub by setting up a Cloud Build trigger. In the next lab, you will walk through inspection of TFX metadata and pipeline artifacts created during TFX pipeline runs.

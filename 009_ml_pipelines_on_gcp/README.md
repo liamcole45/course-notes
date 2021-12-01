@@ -169,3 +169,8 @@ Objectives:
 - Integrate with Github to trigger workflows with pipeline source repository changes.
 
 In this lab, you walked through authoring a Cloud Build CI/CD workflow that automatically builds and deploys a TFX pipeline. You also integrated your TFX workflow with GitHub by setting up a Cloud Build trigger. In the next lab, you will walk through inspection of TFX metadata and pipeline artifacts created during TFX pipeline runs.
+
+# TFX Pipeline Metadata
+<img src="./pictures/mlmd.png" alt="drawing" width="600"/>
+<img src="./pictures/ml_metadata.png" alt="drawing" width="600"/>
+<img src="./pictures/why_ml_metadata.png" alt="drawing" width="600"/>

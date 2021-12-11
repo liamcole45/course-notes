@@ -213,3 +213,118 @@ The Metadata Store uses the following data model:
 
 ## Continuous Training
 <img src="./pictures/continous_training.png" alt="drawing" width="600"/>
+
+## Lab: Continuous Training with TensorFlow, PyTorch, XGBoost, and Scikit-learn Models with KubeFlow and AI Platform Pipelines
+[multiple_frameworks_lab.ipynb](./labs/multiple_frameworks_lab.ipynb). Downloaded from [here](https://github.com/GoogleCloudPlatform/mlops-on-gcp/blob/1a5b4732673e2b45a18c6c758a831845005fe435/continuous_training/kubeflow/labs/multiple_frameworks_lab.ipynb)
+
+### Overview
+In this lab we will create containerized training applications for ML models in TensorFlow, PyTorch, XGBoost, and Scikit-learn. Will will then use these images as ops in a KubeFlow pipeline and train multiple models in parallel. We will then set up recurring runs of our KubeFlow pipeline in the UI. 
+
+First, we will containerize models in TF, PyTorch, XGBoost and Scikit-learn following a step-wise process for each:
+* Create the training script
+* Package training script into a Docker Image 
+* Build and push training image to Google Cloud Container Registry
+
+Once we have all four training images built and pushed to the Container Registry, we will build a KubeFlow pipeline that does two things:
+* Queries BigQuery to create training/validation splits and export results as sharded CSV files in GCS
+* Launches AI Platform training jobs with our four containerized training applications, using the exported CSV data as input 
+
+Finally, we will compile and deploy our pipeline. In the UI we will set up Continuous Training with recurring pipeline runs.
+
+**PRIOR TO STARTING THE LAB:** Make sure you create a new instance with AI Platform Pipelines. Once the GKE cluster is spun up, copy the endpoint because you will need it in this lab. 
+
+### Objectives
+- Create the training script
+- Package training script into a Docker Image
+- Build and push training image to Google Cloud Container Registry
+- Build a Kubeflow pipeline that queries BigQuery to create training/validation splits and export results as sharded CSV files in GCS
+- Launch AI Platform training jobs with the four containerized training applications, using the exported CSV data as input
+
+In this lab you've learned how to you develop, package as a docker image, and run on AI Platform Training to training application.
+
+### Lab Working
+#### Enable Cloud Services
+
+1. In Cloud Shell, run the command below to set the project id to your Google Cloud Project:
+```
+PROJECT_ID=[YOUR PROJECT ID]
+gcloud config set project $PROJECT_ID
+```
+2. Next, execute the following commands to enable the required Cloud services:
+```
+gcloud services enable \
+cloudbuild.googleapis.com \
+container.googleapis.com \
+cloudresourcemanager.googleapis.com \
+iam.googleapis.com \
+containerregistry.googleapis.com \
+containeranalysis.googleapis.com \
+ml.googleapis.com \
+dataflow.googleapis.com
+```
+3. Add the Editor permission for your Cloud Build service account:
+```
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+CLOUD_BUILD_SERVICE_ACCOUNT="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member serviceAccount:$CLOUD_BUILD_SERVICE_ACCOUNT \
+  --role roles/editor
+```
+
+#### Create an instance of AI Platform Pipelines (**via GUI**)
+
+#### Create an instance of AI Platform Notebooks
+
+An instance of AI Platform Notebooks is used as a primary experimentation/development workbench. The instance is configured using a custom container image that includes all Python packages required for this lab. (**creates container image**)
+
+1. In Cloud Shell, create a folder in your home directory:
+```
+cd
+mkdir tmp-workspace
+cd tmp-workspace
+```
+2. Create a requirements file with the Python packages to install in the custom image.
+```
+gsutil cp gs://cloud-training/OCBL203/requirements.txt .
+```
+3. Create a Dockerfile defining you custom container image.
+```
+gsutil cp gs://cloud-training/OCBL203/Dockerfile .  
+```
+4. Build the image and push it to your project's Container Registry
+```
+IMAGE_NAME=kfp-dev
+TAG=latest
+IMAGE_URI="gcr.io/${PROJECT_ID}/${IMAGE_NAME}:${TAG}"
+gcloud builds submit --timeout 15m --tag ${IMAGE_URI} .
+```
+5. Create an instance of AI Platform Notebooks (**took a while to show in instances although it said it created it successfully**)
+```
+ZONE=[YOUR_ZONE]
+INSTANCE_NAME=[YOUR_INSTANCE_NAME]
+IMAGE_FAMILY="common-container"
+IMAGE_PROJECT="deeplearning-platform-release"
+INSTANCE_TYPE="n1-standard-4"
+METADATA="proxy-mode=service_account,container=$IMAGE_URI"
+gcloud compute instances create $INSTANCE_NAME \
+  --zone=$ZONE \
+  --image-family=$IMAGE_FAMILY \
+  --machine-type=$INSTANCE_TYPE \
+  --image-project=$IMAGE_PROJECT \
+  --maintenance-policy=TERMINATE \
+  --boot-disk-device-name=${INSTANCE_NAME}-disk \
+  --boot-disk-size=100GB \
+  --boot-disk-type=pd-ssd \
+  --scopes=cloud-platform,userinfo-email \
+  --metadata=$METADATA
+```
+
+#### Navigate to the lab notebook
+
+In JupyterLab UI, navigate to mlops-on-gcp/continuous_training/kubeflow/labs and open multiple_frameworks_lab.ipynb.
+
+Clear all the cells in the notebook (look for the Clear button on the notebook toolbar) and then Run the cells one by one. Note the some cells have a #TODO for you to write the code before you run the cell.
+
+When prompted, come back to these instructions to check your progress.
+
+If you need more help, you may take a look at the complete solution by navigating to mlops-on-gcp/continuous_training/kubeflow/solutions open multiple_frameworks_kubeflow.ipynb.

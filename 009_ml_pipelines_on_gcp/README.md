@@ -174,3 +174,31 @@ In this lab, you walked through authoring a Cloud Build CI/CD workflow that auto
 <img src="./pictures/mlmd.png" alt="drawing" width="600"/>
 <img src="./pictures/ml_metadata.png" alt="drawing" width="600"/>
 <img src="./pictures/why_ml_metadata.png" alt="drawing" width="600"/>
+
+## TFX Metadata  
+[lab-04.ipynb](./labs/lab-04.ipynb). Need to run this to create files used in this lab
+```
+cd mlops-on-gcp/workshops/tfx-caip-tf23
+./install.sh
+```
+
+In this lab, you will explore TFX pipeline metadata including pipeline and run artifacts. An AI Platform Pipelines instance includes the ML Metadata service. In AI Platform Pipelines, ML Metadata uses MySQL as a database backend and can be accessed using a GRPC server.
+
+Objectives
+- Use a GRPC server to access and analyze pipeline artifacts stored in the ML Metadata service of your AI Platform Pipelines instance
+
+In this lab, you explored ML metadata and ML artifacts created by TFX pipeline runs using TFX pipeline ResolverNodes.
+
+## Exploring ML Metadata 
+
+The Metadata Store uses the following data model:
+
+- `ArtifactType` describes an artifact's type and its properties that are stored in the Metadata Store. These types can be registered on-the-fly with the Metadata Store in code, or they can be loaded in the store from a serialized format. Once a type is registered, its definition is available throughout the lifetime of the store.
+- `Artifact` describes a specific instances of an ArtifactType, and its properties that are written to the Metadata Store.
+- `ExecutionType` describes a type of component or step in a workflow, and its runtime parameters.
+- `Execution` is a record of a component run or a step in an ML workflow and the runtime parameters. An Execution can be thought of as an instance of an ExecutionType. Every time a developer runs an ML pipeline or step, executions are recorded for each step.
+- `Event` is a record of the relationship between an Artifact and Executions. When an Execution happens, Events record every Artifact that was used by the Execution, and every Artifact that was produced. These records allow for provenance tracking throughout a workflow. By looking at all Events MLMD knows what Executions happened, what Artifacts were created as a result, and can recurse back from any Artifact to all of its upstream inputs.
+- `ContextType` describes a type of conceptual group of Artifacts and Executions in a workflow, and its structural properties. For example: projects, pipeline runs, experiments, owners.
+- `Context` is an instances of a ContextType. It captures the shared information within the group. For example: project name, changelist commit id, experiment annotations. It has a user-defined unique name within its ContextType.
+- `Attribution` is a record of the relationship between Artifacts and Contexts.
+- `Association` is a record of the relationship between Executions and Contexts.

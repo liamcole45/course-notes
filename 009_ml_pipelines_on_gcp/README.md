@@ -202,3 +202,14 @@ The Metadata Store uses the following data model:
 - `Context` is an instances of a ContextType. It captures the shared information within the group. For example: project name, changelist commit id, experiment annotations. It has a user-defined unique name within its ContextType.
 - `Attribution` is a record of the relationship between Artifacts and Contexts.
 - `Association` is a record of the relationship between Executions and Contexts.
+
+# Continous Training with multiple SKK's, Kubeflow & AI Platform Pipelines
+## Containerised Training Applications
+<img src="./pictures/training_with_custom_containers.png" alt="drawing" width="600"/>
+<img src="./pictures/training_job_as_an_op_in_kubeflow_pipeline.png" alt="drawing" width="600"/>
+<img src="./pictures/training_multiple_models.png" alt="drawing" width="600"/>
+<img src="./pictures/creating_parallel_training_runs.png" alt="drawing" width="600"/>
+<img src="./pictures/linking_models_and_containers.png" alt="drawing" width="600"/>
+
+## Continuous Training
+<img src="./pictures/continous_training.png" alt="drawing" width="600"/>

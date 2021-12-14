@@ -440,7 +440,6 @@ Make sure that you're on the DAGs tab in the Airflow web interface. It takes sev
 ## 1. mlflow Tracking
 <img src="./pictures/mlflow_tracking.png" alt="drawing" width="600"/>
 <img src="./pictures/mlflow_projects_motivation.png" alt="drawing" width="600"/>
-<img src="./pictures/mlflow_tracking.png" alt="drawing" width="600"/>
 
 ## 2. mlflow Projects
 <img src="./pictures/mlflow_projects.png" alt="drawing" width="600"/>
@@ -457,3 +456,15 @@ Make sure that you're on the DAGs tab in the Airflow web interface. It takes sev
 <img src="./pictures/mlflow_model_management.png" alt="drawing" width="600"/>
 <img src="./pictures/mlflow_model_registry.png" alt="drawing" width="600"/>
 <img src="./pictures/mlflow_model_registry_ui.png" alt="drawing" width="600"/>
+
+## Installation
+1. pip install it (can take 50 mins)
+2. Do this `nohup` command to execute server
+<img src="./pictures/ml_flow_start.png" alt="drawing" width="600"/>
+
+3. Git clone what you want then run model in bash
+mlflow_example_clone
+<img src="./pictures/mlflow_example_clone.png" alt="drawing" width="600"/>
+<img src="./pictures/ml_flow_running_model.png" alt="drawing" width="600"/>
+
+4. Use gui for evaluation and rest of ML Ops

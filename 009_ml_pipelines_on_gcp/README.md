@@ -431,3 +431,29 @@ Make sure that you're on the DAGs tab in the Airflow web interface. It takes sev
 - Click the "Refresh" link to make sure you're looking at the most recent information. The borders of the processes change colors as the state of the process changes
 - Once the status for ml_engine_training_chicago_taxi_trips_task has changed to running, go to Navigation menu > AI Platform > Jobs and confirm the job is running. This job will take 10-15 minutes to complete.
 - Once all the steps are complete in the DAG, each step has a dark green border or pink border (for tasks that were skipped)
+
+# [mlflow](https://mlflow.org/)
+## Overview
+<img src="./pictures/mlflow_lifecycle.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_overview.png" alt="drawing" width="600"/>
+
+## 1. mlflow Tracking
+<img src="./pictures/mlflow_tracking.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_projects_motivation.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_tracking.png" alt="drawing" width="600"/>
+
+## 2. mlflow Projects
+<img src="./pictures/mlflow_projects.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_project_example.png" alt="drawing" width="600"/>
+
+## 3. mlflow Models
+<img src="./pictures/mlflow_models_motivation.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_models.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_models_example.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_models_kera_example.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflavors_example.png" alt="drawing" width="600"/>
+
+## 4. mlflow Registry
+<img src="./pictures/mlflow_model_management.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_model_registry.png" alt="drawing" width="600"/>
+<img src="./pictures/mlflow_model_registry_ui.png" alt="drawing" width="600"/>

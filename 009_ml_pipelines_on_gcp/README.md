@@ -328,3 +328,106 @@ Clear all the cells in the notebook (look for the Clear button on the notebook t
 When prompted, come back to these instructions to check your progress.
 
 If you need more help, you may take a look at the complete solution by navigating to mlops-on-gcp/continuous_training/kubeflow/solutions open multiple_frameworks_kubeflow.ipynb.
+
+## Continuous Training Pipelines with Cloud Composer
+[chicago_taxi_dag.py](./labs/chicago_taxi_dag.py). Downloaded from [here](https://github.com/GoogleCloudPlatform/mlops-on-gcp/blob/617a76a00a0a789eaff4bbb05c5aae1342a6b604/continuous_training/composer/solutions/chicago_taxi_dag.py)
+
+### Overview
+In this lab you will learn how to write an Airflow DAG for continuous training and deploy the DAG within a Cloud Composer environment. You will also learn how to explore and monitor your DAG runs using the Apache Airflow webserver.
+Objectives
+
+In this lab, you will learn to perform the following tasks:
+- Provision a Cloud Composer environment.
+- Deploy an Apache Airflow Dialog.
+- Monitor a continuous training pipeline in the Airflow webserver.
+- Explore Airflow logs using Cloud Operations.
+
+#### Task 1. Provision Google Cloud Resources
+In this task, you configure and deploy a Cloud Composer environment to run a fully-managed installation of Apache Airflow.
+
+1. Run the following command to enable the required Cloud service:
+```
+gcloud services enable ml.googleapis.com
+```
+2. Download Code Repository
+In the Cloud Shell terminal, run the following commands
+```
+git clone https://github.com/GoogleCloudPlatform/mlops-on-gcp
+cd mlops-on-gcp/continuous_training/composer/labs/
+ls
+```
+3. Provision Google Cloud Resources and Stage Trainer Package
+In the Cloud Shell terminal, run the following command to create a regional Cloud Storage bucket in the us-central1 region:
+```
+export BUCKET_NAME=${DEVSHELL_PROJECT_ID}
+export REGION=us-central1
+gsutil mb -l ${REGION} gs://${BUCKET_NAME}
+```
+4. Compress the trainer package and copy to your Cloud Storage bucket by running the following commands:
+```
+tar -cvf trainer.tar chicago_taxifare
+gsutil cp ./trainer.tar gs://${BUCKET_NAME}/chicago_taxi/code/
+```
+5. Create a Pub/Sub topic to receive messages from your Pub/Sub pipeline by running the following command:
+```
+gcloud pubsub topics create chicago-taxi-pipeline
+```
+6. Create a BigQuery dataset for storing preprocessed data for training and a table for storing training metrics by running the following commands:
+```
+bq mk -d chicago_taxi_ct
+bq mk --table chicago_taxi_ct.model_metrics version_name:STRING,rmse:FLOAT
+```
+7. Create Cloud Composer environment
+Create your Cloud Composer environment by running the following command in Cloud Shell:
+```
+gcloud composer environments create demo-environment \
+  --location $REGION \
+  --python-version 3
+```
+
+Task 3. Run DAG in Apache Airflow
+
+In this task you will copy your newly completed DAG into a Cloud Storage bucket, which will be automatically synced with your Cloud Composer environment. Afterwards you will check that your DAG was loaded correctly and start a DAG run.
+Check that Cloud Composer environment is ready.
+- In the Google Clod Console, on the Navigation menu (Navigation menu), scroll down to the Big Data heading and click on Composer.
+- You should see your Composer environment, demo-environment. If it is still being setup, then wait until that process is complete before moving on to the next step.
+
+Define Airflow Variables
+Return to Cloud Shell, and run the following command:
+```
+gcloud composer environments storage data import \
+  --source vars.json \
+  --environment demo-environment \
+  --location $REGION
+gcloud composer environments run demo-environment \
+  --location $REGION variables \
+  -- \
+  --i /home/airflow/gcs/data/vars.json
+```
+Copy DAG into Cloud Storage bucket.
+In Cloud Shell, and run the following commands:
+```
+DAGS_FOLDER=$(gcloud composer environments describe demo-environment \
+   --location $REGION   --format="get(config.dagGcsPrefix)")
+gsutil cp ./chicago_taxi_dag.py ${DAGS_FOLDER}/
+```
+
+Task 4. Exploring Your DAG Run in the Airflow UI
+Accessing Airflow UI
+
+To access the Airflow web interface using the GCP Console:
+- Go back to the Environments page.
+- In the Airflow webserver column for the environment, click Airflow.
+- Click on your lab credentials.
+- The Airflow web interface opens in a new browser window.
+
+Exploring DAG runs
+
+**When you upload your DAG file to the dags folder in Cloud Storage, Cloud Composer parses the file. If no errors are found, the name of the workflow appears in the DAG listing, and the workflow is queued to run immediately.**
+
+Make sure that you're on the DAGs tab in the Airflow web interface. It takes several minutes for this process to complete. Refresh your browser to make sure you're looking at the latest information.
+- In Airflow, click chicago_taxi_dag to open the DAG details page. This page includes several representations of the workflow tasks and dependencies.
+- In the toolbar, click Graph View. Mouseover the graphic for each task to see its status. Note that the border around each task also indicates the status (green border = running; red = failed; pink = skipped, etc.).
+- Click the "Refresh" link to make sure you're looking at the most recent information. The borders of the processes change colors as the state of the process changes
+- Once the status for ml_engine_training_chicago_taxi_trips_task has changed to running, go to Navigation menu > AI Platform > Jobs and confirm the job is running. This job will take 10-15 minutes to complete.
+- Once all the steps are complete in the DAG, each step has a dark green border or pink border (for tasks that were skipped)

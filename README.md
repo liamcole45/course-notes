@@ -19,3 +19,6 @@ Completed in this order
 
 ### Search Items
 - `liam-functions` - handy functions
+
+### GCP Developer Cheat Sheet
+<img src="./gcp_developer_cheat_sheet.png" alt="drawing" width="600"/>

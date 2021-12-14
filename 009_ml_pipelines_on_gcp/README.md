@@ -1,13 +1,5 @@
 # Notes from Lectures, Labs and Readings
 
-### Demo Readme Template Code
-<img src="./pictures/ml_code_minority.png" alt="drawing" width="600"/>
-
-### Demo Readme Template Code
-[serving_ml_prediction.ipynb](./labs/serving_ml_prediction.ipynb)
-Downloaded from [here](https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/machine_learning/deepdive2/production_ml/labs/serving_ml_prediction.ipynb)
-
-
 # TensorFlow Extended (TFX) Overview
 <img src="./pictures/tfx_overview.png" alt="drawing" width="600"/>
 

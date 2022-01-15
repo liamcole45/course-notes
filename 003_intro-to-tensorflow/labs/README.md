@@ -1343,7 +1343,7 @@ train_features = np.array(train_df)
 val_features = np.array(val_df)
 test_features = np.array(test_df)
 ```
-4. `liam-functions` To get an idea about arrays, especually numpy arrays. Unable to do pd.describe()
+4. `handy-function` To get an idea about arrays, especually numpy arrays. Unable to do pd.describe()
 ```
 def array_info(array_name, name= "array"):
     print(f"{name} ndim: ", array_name.ndim)
